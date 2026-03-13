@@ -1,5 +1,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Nunito&display=swap');
 
+:root {
+  --board-bg: rgba(227, 216, 216, 0.35);
+  --overlay-bg: rgba(0, 0, 0, 0.6);
+  --glass-border-radius: 9px;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -14,7 +20,8 @@ html {
 body {
   font-family: 'Nunito', sans-serif;
   font-weight: 400;
-  height: 100vh;
+  min-height: 100vh;
+  line-height: 1.4;
   color: #333;
   background-image: linear-gradient(to top left, #101091 0%, #3574da 100%);
   display: flex;
@@ -27,11 +34,10 @@ main {
   position: relative;
   width: 180rem;
   height: 90rem;
-  background-color: rgba(227, 216, 216, 0.35);
+  background-color: var(--board-bg);
   backdrop-filter: blur(200px);
-  filter: blur();
   box-shadow: 0 3rem 5rem rgba(0, 0, 0, 0.25);
-  border-radius: 9px;
+  border-radius: var(--glass-border-radius);
   overflow: hidden;
   display: flex;
 }
@@ -427,8 +433,9 @@ main {
   text-transform: uppercase;
   cursor: pointer;
   font-weight: 400;
-  transition: all 0.2s;
+  transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s;
   letter-spacing: 1px;
+  border: 1px solid transparent;
 
   background-color: white;
   background-color: rgba(255, 255, 255, 0.6);
@@ -488,6 +495,11 @@ main {
   outline: none;
 }
 
+.btn:focus-visible {
+  outline: 3px solid #101091;
+  outline-offset: 3px;
+}
+
 .dice {
   position: absolute;
   left: 50%;
@@ -510,7 +522,7 @@ main {
 .board-overlay {
   position: absolute;
   inset: 0;
-  background-color: rgba(0, 0, 0, 0.6);
+  background-color: var(--overlay-bg);
   backdrop-filter: blur(3px);
   z-index: 900; /* sits above the board, below spotlighted elements */
   pointer-events: none;
@@ -660,7 +672,7 @@ main.board-inert .btn--retreat {
   top: 0;
   width: 50%;
   height: 100%;
-  background-color: rgba(0,0,0,0.6);
+  background-color: var(--overlay-bg);
   backdrop-filter: blur(3px);
   z-index: 1100;
 }
@@ -725,7 +737,7 @@ main.board-inert .btn--hand2 {
   top: 0;
   width: 50%;
   height: 100%;
-  background-color: rgba(0,0,0,0.6);
+  background-color: var(--overlay-bg);
   backdrop-filter: blur(3px);
   z-index: 1100;
 }
