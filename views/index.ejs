@@ -3,17 +3,29 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title><%= title %></title>
     <meta name="description" content="Pokémon Trading Card Game Plus - Play a digital version of the classic TCG!">
     <link rel="stylesheet" href="/css/style.css" />
     <link rel="stylesheet" href="/css/energy_styles.css" />
     <noscript>
-      <style>main { display: none !important; }</style>
-      <div class="noscript-msg">This game requires JavaScript to play.</div>
+      <style>
+        main { display: none !important; }
+        .noscript-msg {
+          margin: 2rem auto;
+          max-width: 42rem;
+          padding: 1rem 1.25rem;
+          border: 2px solid #222;
+          border-radius: 0.5rem;
+          background: #fff7d6;
+          color: #111;
+          font: 600 1rem/1.4 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+          text-align: center;
+        }
+      </style>
     </noscript>
   </head>
   <body>
+    <noscript><div class="noscript-msg" role="alert">This game requires JavaScript to play.</div></noscript>
     <main>
       <% for(let player=0; player<2; player++) { %>
       <section class="player player--<%= player %><%= player === 0 ? ' player--active' : '' %>">
@@ -63,7 +75,7 @@
             <h2 class="hitpoint">HP:</h2>
             <div class="hitpoint current-health" id="active-health-<%= i %>-<%= player+1 %>">- / -</div>
           </div>
-          <button class="btn btn--retreat hidden" id="retreat-btn-<%= i %>-<%= player+1 %>">Retreat</button>
+          <button type="button" class="btn btn--retreat hidden" id="retreat-btn-<%= i %>-<%= player+1 %>">Retreat</button>
         <% } %>
         <!-- Health display for bench -->
         <% for(let i=1; i<=benchSlots; i++) { %>
@@ -88,13 +100,13 @@
         <div class="trainer-menu hidden" id="trainer-menu-<%= player+1 %>">
           <div class="trainer-slot" id="trainer-slot-<%= player+1 %>"></div>
           <img class="trainer-card trainer-card<%= player+1 %> hidden" src="/Pokemon/Base_70.jpg" alt="Trainer Card"/>
-          <button class="btn btn--trainer--confirm btn--trainer--confirm<%= player+1 %> hidden">Confirm</button>
-          <button class="btn btn--trainer--cancel<%= player+1 %>">Cancel</button>
+          <button type="button" class="btn btn--trainer--confirm btn--trainer--confirm<%= player+1 %> hidden">Confirm</button>
+          <button type="button" class="btn btn--trainer--cancel<%= player+1 %>">Cancel</button>
         </div>
         <!-- Energy menu -->
         <div class="energy-menu hidden" id="energy-cards-<%= player === 0 ? 2 : 1 %>">
           <% for(let i=1; i<=energySlots; i++) { %>
-            <button class="btn btn--plus plus<%= i %>-<%= player+1 %>"><strong>+</strong></button>
+            <button type="button" class="btn btn--plus plus<%= i %>-<%= player+1 %>"><strong>+</strong></button>
           <% } %>
           <div class="energy-count fighting-count<%= player+1 %>">0</div>
           <div class="energy-count fire-count<%= player+1 %>">0</div>
@@ -106,24 +118,24 @@
           <img class="fire-energy-<%= player+1 %> energy-card unused-energy" src="/Energy/Base_fire_energy.jpg" alt="Fire Energy"/>
           <img class="grass-energy-<%= player+1 %> energy-card unused-energy" src="/Energy/Base_grass_energy.jpg" alt="Grass Energy"/>
           <img class="lightning-energy-<%= player+1 %> energy-card unused-energy" src="/Energy/Base_lightning_energy.jpg" alt="Lightning Energy"/>
-          <img class="psychic-energy-<%= player+1 %> energy-card unused-energy" src="/Energy/Base_psychic_energy.jpg" alt="Psychic Energy"/>
+          <img class="psychic-energy-<%= player+1 %> energy-card unused-energy" src="/Energy/Base_psychic_Energy.jpg" alt="Psychic Energy"/>
           <img class="water-energy-<%= player+1 %> energy-card unused-energy" src="/Energy/Base_water_energy.jpg" alt="Water Energy"/>
         </div>
         <!-- Hand and deck info -->
-        <button class="btn btn--hand<%= player+1 %> hidden">Hand</button>
-        <button class="btn btn--discard<%= player+1 %> hidden">Discard</button>
+        <button type="button" class="btn btn--hand<%= player+1 %> hidden">Hand</button>
+        <button type="button" class="btn btn--discard<%= player+1 %> hidden">Discard</button>
         <div class="remaining-cards<%= player+1 %> hidden">Cards Remaining In Deck: 33</div>
       </section>
       <% } %>
 
       <!-- Board-wide controls -->
-      <button class="btn btn--new">🔄 New game</button>
-      <button class="btn btn--end hidden">End Turn</button>
-      <button class="btn btn--attack hidden">Attack!</button>
-      <button class="btn btn--energy hidden">Energy: 1</button>
+      <button type="button" class="btn btn--new">🔄 New game</button>
+      <button type="button" class="btn btn--end hidden">End Turn</button>
+      <button type="button" class="btn btn--attack hidden">Attack!</button>
+      <button type="button" class="btn btn--energy hidden">Energy: 1</button>
 
       <!-- Prize card menu (4 facedown) -->
-      <div class="prize-card-menu hidden">
+      <div class="prize-card-menu hidden" role="region" aria-label="Prize Cards">
         <div class="prize-card-slot prize-card-slot-1"></div>
         <div class="prize-card-slot prize-card-slot-2"></div>
         <div class="prize-card-slot prize-card-slot-3"></div>
@@ -134,16 +146,16 @@
         <img class="prize-card prize-card-2" src="/Pokemon/facedown.jpg" alt="Prize Card (facedown)"/>
         <img class="prize-card prize-card-3" src="/Pokemon/facedown.jpg" alt="Prize Card (facedown)"/>
         <img class="prize-card prize-card-4" src="/Pokemon/facedown.jpg" alt="Prize Card (facedown)"/>
-        <button class="btn btn--take-prize hidden">Take Prize</button>
+        <button type="button" class="btn btn--take-prize hidden">Take Prize</button>
       </div>
       <!-- Global overlay that matches the hand/energy look -->
       <div class="board-overlay hidden" id="board-overlay"></div>
 
       <!-- Slim side panel for attacks (only visible during attack selection) -->
-      <aside class="attack-panel hidden" id="attack-panel">
+      <aside class="attack-panel hidden" id="attack-panel" aria-live="polite">
         <h3 id="attack-panel-title">Choose an attack</h3>
         <div id="attack-panel-options"></div>
-        <button id="cancel-attack" class="btn btn--attack-cancel">Cancel</button>
+        <button type="button" id="cancel-attack" class="btn btn--attack-cancel">Cancel</button>
       </aside>
       <div id="win-modal" class="win-modal hidden" role="dialog" aria-live="polite" aria-modal="true">
         <div class="win-box">

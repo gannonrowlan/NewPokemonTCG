@@ -2,14 +2,15 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>404 - Page Not Found</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title || "404 - Page Not Found" %></title>
   <link rel="stylesheet" href="/css/style.css" />
 </head>
 <body>
   <main>
     <h1>404</h1>
     <p>Sorry, that page could not be found.</p>
-    <a href="/">Return to Home</a>
+    <a href="/" aria-label="Return to home page">Return to Home</a>
   </main>
 </body>
 </html>
