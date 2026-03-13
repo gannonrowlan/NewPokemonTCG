@@ -1,0 +1,813 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: inherit;
+}
+
+html {
+  font-size: 62.5%;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 400;
+  height: 100vh;
+  color: #333;
+  background-image: linear-gradient(to top left, #101091 0%, #3574da 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* LAYOUT */
+main {
+  position: relative;
+  width: 180rem;
+  height: 90rem;
+  background-color: rgba(227, 216, 216, 0.35);
+  backdrop-filter: blur(200px);
+  filter: blur();
+  box-shadow: 0 3rem 5rem rgba(0, 0, 0, 0.25);
+  border-radius: 9px;
+  overflow: hidden;
+  display: flex;
+}
+
+.hidden { display: none !important; }
+
+.card-slot-active {
+  position: absolute;
+  width: 243.8px;
+  height: 335px;
+  background-color: #15245b;
+  border: 5px inset #4058db;
+}
+.card-slot-bench {
+  position: absolute;
+  width: 204.83px;
+  height: 280.83px;
+  background-color: #3b0d0d;
+  border: 5px inset #601412;
+}
+
+.slot-active1-1 {
+  left: 475px;
+  top: 25px;
+}
+.slot-active2-1 {
+  left: 475px;
+  bottom: 95px;
+}
+.slot-active1-2 {
+  right: 475px;
+  top: 25px;
+}
+.slot-active2-2 {
+  right: 475px;
+  bottom: 95px;
+}
+.slot-bench1-1 {
+  left: 35px;
+  bottom: 555px;
+}
+.slot-bench2-1 {
+  left: 245px;
+  bottom: 555px;
+}
+.slot-bench3-1 {
+  left: 35px;
+  bottom: 215px;
+}
+.slot-bench4-1 {
+  left: 245px;
+  bottom: 215px;
+}
+.slot-bench1-2 {
+  right: 35px;
+  bottom: 555px;
+}
+.slot-bench2-2 {
+  right: 245px;
+  bottom: 555px;
+}
+.slot-bench3-2 {
+  right: 35px;
+  bottom: 215px;
+}
+.slot-bench4-2 {
+  right: 245px;
+  bottom: 215px;
+}
+
+/* ACTIVE POKEMON */
+.active {
+  position: absolute;
+  width: 233.8px;
+  height: 325px;
+  box-shadow: 0 2rem 5rem rgba(0, 0, 0, 0.2);
+}
+.top-active1 {
+  left: 480px;
+  top: 30px;
+}
+.bottom-active1 {
+  left: 480px;
+  bottom: 100px;
+}
+.top-active2 {
+  right: 480px;
+  top: 30px;
+}
+.bottom-active2 {
+  right: 480px;
+  bottom: 100px;
+}
+
+/* BENCH */
+.bench-title {
+  position: absolute;
+  top: 10px;
+  font-size: 4rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  word-spacing: 2px;
+  font-weight: 300;
+}
+.bench-title1 {
+  left: 175px;
+}
+.bench-title2 {
+  right: 175px;
+}
+
+.bench {
+  position: absolute;
+  width: 194.83px;
+  height: 270.83px;
+  box-shadow: 0 2rem 5rem rgba(0, 0, 0, 0.2);
+}
+.bench1-1 {
+  left: 40px;
+  bottom: 560px;
+}
+.bench1-2 {
+  right: 40px;
+  bottom: 560px;
+}
+.bench2-1 {
+  left: 250px;
+  bottom: 560px;
+}
+.bench2-2 {
+  right: 250px;
+  bottom: 560px;
+}
+.bench3-1 {
+  left: 40px;
+  bottom: 220px;
+}
+.bench3-2 {
+  right: 40px;
+  bottom: 220px;
+}
+.bench4-1 {
+  left: 250px;
+  bottom: 220px;
+}
+.bench4-2 {
+  right: 250px;
+  bottom: 220px;
+}
+
+/* Player Names */
+.name {
+  position: absolute;
+  bottom: 460px;
+  font-size: 4rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  word-spacing: 2px;
+  font-weight: 300;
+}
+.name1 {
+  left: 505px;
+}
+.name2 {
+  right: 505px;
+}
+
+/* HITPOINTS*/
+.hitpoint {
+  position: relative;
+  font-size: 4rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  word-spacing: 2px;
+  font-weight: 300;
+}
+.current-bench-health {
+  font-size: 2.25rem;
+}
+.current-health {
+  font-size: 2.4rem;
+}
+.health {
+  position: absolute;
+  background-color: #15245b;
+  opacity: 0.8;
+  border-radius: 9px;
+  color: #fff;
+  width: 150px;
+  padding: 1.5rem;
+  text-align: center;
+  transition: all 0.75s;
+}
+.bench-health {
+  padding: 1rem;
+  width: 190px;
+  height: 50px;
+}
+.active-health-top1 {
+  top: 150px;
+  left: 730px;
+}
+.active-health-top2 {
+  top: 150px;
+  right: 730px;
+}
+.active-health-bottom1 {
+  bottom: 175px;
+  left: 730px;
+}
+.active-health-bottom2 {
+  bottom: 175px;
+  right: 730px;
+}
+
+.bench-health-1-1 {
+  top: 350px;
+  left: 42px;
+}
+.bench-health-1-2 {
+  top: 350px;
+  right: 42px;
+}
+.bench-health-2-1 {
+  top: 350px;
+  left: 252px;
+}
+.bench-health-2-2 {
+  top: 350px;
+  right: 252px;
+}
+.bench-health-3-1 {
+  bottom: 160px;
+  left: 42px;
+}
+.bench-health-3-2 {
+  bottom: 160px;
+  right: 42px;
+}
+.bench-health-4-1 {
+  bottom: 160px;
+  left: 252px;
+}
+.bench-health-4-2 {
+  bottom: 160px;
+  right: 252px;
+}
+
+.prize-card-menu {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(3px);
+  z-index: 1200;
+  display: grid;
+  grid-template-columns: repeat(2, 243.8px);  /* matches slot size */
+  grid-auto-rows: 335px;                      /* matches slot size */
+  gap: 2rem;
+  justify-content: center;  /* center horizontally */
+  align-content: center;    /* center vertically */
+  perspective: 1200px;
+}
+.prize-card {
+  position: static !important; /* ignore earlier top/left rules */
+  width: 233.8px;
+  height: 325px;
+  box-shadow: 0 2rem 5rem rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  transform: rotateY(0deg);
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+  transition: transform 300ms ease;  /* half-flip duration */
+  will-change: transform;
+}
+.prize-card.is-flipping {
+  transform: rotateY(90deg);
+}
+.prize-card.revealed {
+  outline: 6px solid #e4c82e;
+  outline-offset: 3px;
+}
+.prize-card-slot {
+  display: none
+}
+.btn--take-prize {
+  bottom: 6rem;
+  z-index: 1300;
+  font-size: 2rem;
+}
+.prize-card.locked-others {
+  cursor: not-allowed;
+}
+.trainer-menu {
+  position: absolute;
+  top: 0px;
+  width: 50%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(3px);
+}
+.trainer-slot {
+  position: absolute;
+  top: 150px;
+  right: 333px;
+  width: 243.8px;
+  height: 335px;
+  background-color: #0e0e0d;
+  border: 5px inset #000000;
+}
+.trainer-card {
+  position: absolute;
+  width: 233.8px;
+  height: 325px;
+  top: 155px;
+  right: 338px;
+}
+
+.remaining-cards1 {
+  position: absolute;
+  bottom: 20px;
+  left: 80px;
+  font-size: 2rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  word-spacing: 2px;
+  font-weight: 300;
+}
+.remaining-cards2 {
+  position: absolute;
+  bottom: 20px;
+  right: 65px;
+  font-size: 2rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  word-spacing: 2px;
+  font-weight: 300;
+}
+.player {
+  flex: 50%;
+  padding: 9rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: all 0.75s;
+}
+
+.player--active {
+  background-color: rgba(255, 255, 255, 0.4);
+}
+.player--active .name {
+  font-weight: 700;
+}
+.player--active .score {
+  font-weight: 400;
+}
+
+.player--active .current {
+  opacity: 1;
+}
+
+.current {
+  background-color: #c7365f;
+  opacity: 0.8;
+  border-radius: 9px;
+  color: #fff;
+  width: 65%;
+  padding: 2rem;
+  text-align: center;
+  transition: all 0.75s;
+}
+
+.current-label {
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+  font-size: 1.7rem;
+  color: #ddd;
+}
+
+.current-score {
+  font-size: 3.5rem;
+}
+
+/* ABSOLUTE POSITIONED ELEMENTS */
+.btn {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #444;
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: 1.8rem;
+  text-transform: uppercase;
+  cursor: pointer;
+  font-weight: 400;
+  transition: all 0.2s;
+  letter-spacing: 1px;
+
+  background-color: white;
+  background-color: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(10px);
+
+  padding: 0.7rem 2.5rem;
+  border-radius: 50rem;
+  box-shadow: 0 1.75rem 3.5rem rgba(0, 0, 0, 0.1);
+  white-space: nowrap;
+}
+.btn--trainer--confirm {
+  top: 520px;
+  left: 445px;
+}
+.btn--trainer--cancel1 {
+  font-size: 2.2rem;
+  top: 300px;
+  left: 730px;
+}
+.btn--trainer--cancel2 {
+  font-size: 2.2rem;
+  top: 300px;
+  left: 165px;
+}
+
+.btn--new {
+  top: 4rem;
+  z-index: 2000;
+}
+
+.btn--end {
+  top: 30rem;
+}
+
+.btn--attack {
+  top: 39.3rem;
+  font-size: 2rem;
+}
+
+.btn--hand1 {
+  top: 80rem;
+  left: 335px;
+  font-size: 2.5rem;
+}
+.btn--hand2 {
+  top: 80rem;
+  left: 1477px;
+  font-size: 2.5rem;
+}
+
+.btn:active {
+  transform: translate(-50%, 3px);
+  box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.15);
+}
+
+.btn:focus {
+  outline: none;
+}
+
+.dice {
+  position: absolute;
+  left: 50%;
+  top: 16.5rem;
+  transform: translateX(-50%);
+  height: 10rem;
+  box-shadow: 0 2rem 5rem rgba(0, 0, 0, 0.2);
+}
+
+.player--winner {
+  background-color: #2f2f2f;
+}
+
+.player--winner .name {
+  font-weight: 700;
+  color: #c7365f;
+}
+
+/* Board-wide overlay, same vibe as hand/energy menus */
+.board-overlay {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(3px);
+  z-index: 900; /* sits above the board, below spotlighted elements */
+  pointer-events: none;
+}
+
+/* Above overlay, no layout shift */
+.board-inert .elevate {
+  z-index: 1001;
+  pointer-events: auto;
+}
+
+/* Force-disable clicks even if elevated */
+.no-pointer {
+  pointer-events: none !important;
+}
+
+/* Attack side panel (sits on the attacking player's side) */
+/* Attack panel — centered modal that sits below elevated HP boxes */
+.attack-panel {
+  position: absolute;
+  top: calc(50% + (var(--attack-safe-top) - var(--attack-safe-bottom)) / 2);
+  left: 50%;
+  transform: translate(-50%, -50%); /* dead center of the board */
+  right: auto;                      /* was right: 2.4rem */
+  width: 38rem;                     /* tweak to taste */
+  max-width: 80%;
+  max-height: calc(100% - (var(--attack-safe-top) + var(--attack-safe-bottom)));
+  overflow: auto;
+  background: rgba(255,255,255,0.95);
+  border: 6px solid #4058db;
+  border-radius: 20px;
+  box-shadow: 0 3rem 6rem rgba(0,0,0,0.18);
+  padding: 1rem;
+  z-index: 1001;  /* below HP/energy (1002), above overlay (1000) */
+  font-family: 'Nunito', sans-serif;
+}
+
+.attack-panel h3 {
+  color: #101091;
+  font-size: 2.2rem;
+  font-weight: 800;
+  letter-spacing: .5px;
+  text-align: center;
+}
+
+/* Move rows */
+.attack-row {
+  display: flex;
+  flex-direction: column;
+  gap: .3rem;
+  padding: .4rem 0;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+  align-items: center;
+}
+
+.attack-move-btn.btn {
+  position: static;   /* fit naturally in panel */
+  left: auto;
+  transform: none;
+  width: 100%;
+  margin: .4rem 0;
+  background: inherit;
+  color: inherit;
+  border-radius: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  box-shadow: inherit;
+}
+
+.attack-move-btn.btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.btn--attack-cancel { margin-top: 1rem; }
+
+/* Make board inert EXCEPT spotlighted things and the attack panel */
+.board-inert :not(.elevate):not(#attack-panel):not(#attack-panel *) {
+  pointer-events: none;
+}
+
+/* Buttons inside the side panel should look like normal buttons but be flow layout */
+.attack-panel .btn {
+  position: static;        /* override global absolute */
+  left: auto;              /* override global 50% */
+  transform: none;         /* override global translateX */
+  width: 100%;
+  margin: .2rem 0;
+}
+
+.attack-pokemon-name {
+  text-align: center;
+  font-size: 1.8rem;     /* larger name */
+  font-weight: 800;
+}
+
+/* Bigger, centered attack labels */
+.attack-panel .attack-move-btn {
+  font-size: 1.5rem;       /* was 1.8rem via .btn */
+  text-align: center;
+  padding: .35rem 1.2rem;
+}
+
+:root{
+  /* tweak these to taste */
+  --attack-safe-top: 27rem;     /* space above panel */
+  --attack-safe-bottom: 30rem;  /* space below panel */
+  --attack-safe-left: 3rem;   /* bring sides in a smidge */
+  --attack-safe-right: 3rem;  /* tweak to taste */
+}
+
+.btn--retreat{
+  position: absolute;
+  left: auto;
+  right: auto;
+  transform: none;
+  width: 150px; 
+  text-align: center;
+  padding: .5rem .8rem;
+  font-size: 1.4rem;
+  font-weight: 700;
+  z-index: 1002;
+}
+
+.btn--retreat[disabled]{ opacity:.6; cursor:not-allowed; }
+
+.btn--retreat:active{ 
+  transform: translateY(3px);
+}
+
+/* Under Player 1 — Top and Bottom HP boxes (left side) */
+#retreat-btn-1-1 { top: 110px;  left: 730px; }   /* under .active-health-top1  */
+#retreat-btn-2-1 { bottom: 135px; left: 730px; } /* under .active-health-bottom1 */
+
+/* Under Player 2 — Top and Bottom HP boxes (right side) */
+#retreat-btn-1-2 { top: 110px;   right: 730px; } /* under .active-health-top2   */
+#retreat-btn-2-2 { bottom: 135px; right: 730px; }/* under .active-health-bottom2*/
+
+main.menu-open .btn--retreat,
+main.board-inert .btn--retreat {
+  display: none !important;
+}
+
+/* Discard UI (mirrors hand/prize overlay) */
+.discard-menu {
+  position: absolute;
+  top: 0;
+  width: 50%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.6);
+  backdrop-filter: blur(3px);
+  z-index: 1100;
+}
+.discard-menu-left { left: 0; }
+.discard-menu-right { right: 0; }
+
+.discard-title {
+  position: absolute;
+  top: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 2.2rem;
+  color: #fff;
+}
+
+.discard-grid {
+  position: absolute;
+  top: 7rem;
+  left: 1rem;
+  right: 1rem;
+  bottom: 2rem;
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  padding: .5rem;
+}
+
+/* Card thumb size: match hand cards */
+.discard-card {
+  width: 194.83px;
+  height: 270.83px;
+  box-shadow: 0 2rem 5rem rgba(0,0,0,0.2);
+  justify-self: center;
+}
+
+/* Discard buttons sit just above Hand buttons on each side */
+.btn--discard1, .btn--discard2 { font-size: 2.2rem; }
+.btn--discard1 { top: 80.2rem; left: 170px; }
+.btn--discard2 { top: 80.2rem; left: 1642px; }
+
+/* Hide Discard buttons if any overlay is open EXCEPT the Discard overlay */
+main.menu-open:not(.discard-open) .btn--discard1,
+main.menu-open:not(.discard-open) .btn--discard2 {
+  display: none !important;
+}
+
+/* Make sure the button sits above the overlay when open */
+.btn--discard1, .btn--discard2 { z-index: 3000; }
+
+main.board-inert .btn--retreat,
+main.board-inert .btn--discard1, 
+main.board-inert .btn--discard2,
+main.board-inert .btn--hand1,
+main.board-inert .btn--hand2 {
+  display: none !important;
+}
+
+/* Hand UI (same layout vibe as Discard) */
+.hand-menu {
+  position: absolute;
+  top: 0;
+  width: 50%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.6);
+  backdrop-filter: blur(3px);
+  z-index: 1100;
+}
+.hand-menu-left  { left: 0; }
+.hand-menu-right { right: 0; }
+
+.hand-title {
+  position: absolute;
+  top: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 2.2rem;
+  color: #fff;
+}
+
+.hand-grid {
+  position: absolute;
+  top: 7rem;
+  left: 0.75rem;
+  right: 0.75rem;
+  bottom: 2rem;
+  overflow-y: auto;
+
+  display: grid;
+
+  /* EXACTLY four cards across at your current thumbnail size */
+  grid-template-columns: repeat(4, 194.83px);
+  grid-auto-rows: 270.83px;
+
+  /* Tighten horizontal gaps */
+  gap: 0.5rem;
+
+  /* Do not stretch tracks or spread them out */
+  justify-content: start; /* leaves extra space on the right */
+  justify-items: start;   /* aligns each card to the left of its track */
+}
+
+/* Keep the card thumbs the same size, but don't center them in the cell */
+.hand-card {
+  width: 194.83px;
+  height: 270.83px;
+  box-shadow: 0 2rem 5rem rgba(0,0,0,0.2);
+  /* remove: justify-self: center; */
+}
+
+
+/* Keep Hand buttons above their overlays */
+.btn--hand1, .btn--hand2 { z-index: 3000; }
+
+/* Hide Discard/Hand buttons when any overlay is open, same pattern you used for discard */
+main.board-inert .btn--hand1,
+main.board-inert .btn--hand2 {
+  display: none !important;
+}
+
+@media (max-width: 1400px) { .hand-grid { grid-template-columns: repeat(3, 194.83px); } }
+@media (max-width: 1100px) { .hand-grid { grid-template-columns: repeat(2, 194.83px); } }
+
+.win-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.7);
+  display: grid;
+  place-items: center;
+  z-index: 2000; /* above board overlay & panels */
+}
+.win-box {
+  background: #111;
+  color: #fff;
+  padding: 2rem 2.5rem;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.5);
+  text-align: center;
+  min-width: min(90vw, 520px);
+}
+.win-title { font-size: 2rem; font-weight: 800; margin-bottom: .5rem; }
+.win-reason { opacity: .85; margin-bottom: 1.25rem; }
+.btn--new.on-overlay {
+  position: fixed;
+  left: 50%;
+  top: calc(50% + 120px); /* sits beneath the win box */
+  transform: translateX(-50%);
+  z-index: 2100;
+  font-size: 1.25rem;
+}

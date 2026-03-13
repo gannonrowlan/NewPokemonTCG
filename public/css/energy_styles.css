@@ -1,0 +1,802 @@
+.energy-menu {
+  position: absolute;
+  top: 0px;
+  width: 50%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(3px);
+}
+.energy-count {
+  position: absolute;
+  background-color: #15245b;
+  border-radius: 9px;
+  color: #fff;
+  width: 50px;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  text-align: center;
+  transition: all 0.75s;
+  font-size: 5rem;
+}
+.energy-card {
+  position: absolute;
+  width: 194.83px;
+  height: 270.83px;
+}
+.energy-badge-active {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+}
+.energy-badge-bench {
+  position: absolute;
+  width: 19px;
+  height: 19px;
+}
+.energy-badge-slot-active {
+  position: absolute;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  background-color: #ffffff;
+}
+.energy-badge-slot-bench {
+  position: absolute;
+  border-radius: 50%;
+  width: 23px;
+  height: 23px;
+  background-color: #ffffff;
+}
+
+/* Player 1 Energy Badge Slots*/
+.energy-badge-slot-1-1-1 {
+  top: 320px;
+  left: 490px;
+}
+.energy-badge-slot-1-1-2 {
+  top: 320px;
+  left: 520px;
+}
+.energy-badge-slot-1-1-3 {
+  top: 320px;
+  left: 550px;
+}
+.energy-badge-slot-1-1-4 {
+  top: 320px;
+  left: 580px;
+}
+.energy-badge-slot-1-1-5 {
+  top: 320px;
+  left: 610px;
+}
+.energy-badge-slot-1-1-6 {
+  top: 320px;
+  left: 640px;
+}
+.energy-badge-slot-1-2-1 {
+  bottom: 107px;
+  left: 490px;
+}
+.energy-badge-slot-1-2-2 {
+  bottom: 107px;
+  left: 520px;
+}
+.energy-badge-slot-1-2-3 {
+  bottom: 107px;
+  left: 550px;
+}
+.energy-badge-slot-1-2-4 {
+  bottom: 107px;
+  left: 580px;
+}
+.energy-badge-slot-1-2-5 {
+  bottom: 107px;
+  left: 610px;
+}
+.energy-badge-slot-1-2-6 {
+  bottom: 107px;
+  left: 640px;
+}
+.energy-badge-slot-1-3-1 {
+  top: 312px;
+  left: 50px;
+}
+.energy-badge-slot-1-3-2 {
+  top: 312px;
+  left: 75px;
+}
+.energy-badge-slot-1-3-3 {
+  top: 312px;
+  left: 100px;
+}
+.energy-badge-slot-1-3-4 {
+  top: 312px;
+  left: 125px;
+}
+.energy-badge-slot-1-3-5 {
+  top: 312px;
+  left: 150px;
+}
+.energy-badge-slot-1-3-6 {
+  top: 312px;
+  left: 175px;
+}
+.energy-badge-slot-1-4-1 {
+  top: 312px;
+  left: 260px;
+}
+.energy-badge-slot-1-4-2 {
+  top: 312px;
+  left: 285px;
+}
+.energy-badge-slot-1-4-3 {
+  top: 312px;
+  left: 310px;
+}
+.energy-badge-slot-1-4-4 {
+  top: 312px;
+  left: 335px;
+}
+.energy-badge-slot-1-4-5 {
+  top: 312px;
+  left: 360px;
+}
+.energy-badge-slot-1-4-6 {
+  top: 312px;
+  left: 385px;
+}
+.energy-badge-slot-1-5-1 {
+  bottom: 225px;
+  left: 50px;
+}
+.energy-badge-slot-1-5-2 {
+  bottom: 225px;
+  left: 75px;
+}
+.energy-badge-slot-1-5-3 {
+  bottom: 225px;
+  left: 100px;
+}
+.energy-badge-slot-1-5-4 {
+  bottom: 225px;
+  left: 125px;
+}
+.energy-badge-slot-1-5-5 {
+  bottom: 225px;
+  left: 150px;
+}
+.energy-badge-slot-1-5-6 {
+  bottom: 225px;
+  left: 175px;
+}
+.energy-badge-slot-1-6-1 {
+  bottom: 225px;
+  left: 260px;
+}
+.energy-badge-slot-1-6-2 {
+  bottom: 225px;
+  left: 285px;
+}
+.energy-badge-slot-1-6-3 {
+  bottom: 225px;
+  left: 310px;
+}
+.energy-badge-slot-1-6-4 {
+  bottom: 225px;
+  left: 335px;
+}
+.energy-badge-slot-1-6-5 {
+  bottom: 225px;
+  left: 360px;
+}
+.energy-badge-slot-1-6-6 {
+  bottom: 225px;
+  left: 385px;
+}
+
+/* Player 2 Energy Badge Slots*/
+.energy-badge-slot-2-1-1 {
+  top: 320px;
+  right: 490px;
+}
+.energy-badge-slot-2-1-2 {
+  top: 320px;
+  right: 520px;
+}
+.energy-badge-slot-2-1-3 {
+  top: 320px;
+  right: 550px;
+}
+.energy-badge-slot-2-1-4 {
+  top: 320px;
+  right: 580px;
+}
+.energy-badge-slot-2-1-5 {
+  top: 320px;
+  right: 610px;
+}
+.energy-badge-slot-2-1-6 {
+  top: 320px;
+  right: 640px;
+}
+.energy-badge-slot-2-2-1 {
+  bottom: 107px;
+  right: 490px;
+}
+.energy-badge-slot-2-2-2 {
+  bottom: 107px;
+  right: 520px;
+}
+.energy-badge-slot-2-2-3 {
+  bottom: 107px;
+  right: 550px;
+}
+.energy-badge-slot-2-2-4 {
+  bottom: 107px;
+  right: 580px;
+}
+.energy-badge-slot-2-2-5 {
+  bottom: 107px;
+  right: 610px;
+}
+.energy-badge-slot-2-2-6 {
+  bottom: 107px;
+  right: 640px;
+}
+.energy-badge-slot-2-3-1 {
+  top: 312px;
+  right: 50px;
+}
+.energy-badge-slot-2-3-2 {
+  top: 312px;
+  right: 75px;
+}
+.energy-badge-slot-2-3-3 {
+  top: 312px;
+  right: 100px;
+}
+.energy-badge-slot-2-3-4 {
+  top: 312px;
+  right: 125px;
+}
+.energy-badge-slot-2-3-5 {
+  top: 312px;
+  right: 150px;
+}
+.energy-badge-slot-2-3-6 {
+  top: 312px;
+  right: 175px;
+}
+.energy-badge-slot-2-4-1 {
+  top: 312px;
+  right: 260px;
+}
+.energy-badge-slot-2-4-2 {
+  top: 312px;
+  right: 285px;
+}
+.energy-badge-slot-2-4-3 {
+  top: 312px;
+  right: 310px;
+}
+.energy-badge-slot-2-4-4 {
+  top: 312px;
+  right: 335px;
+}
+.energy-badge-slot-2-4-5 {
+  top: 312px;
+  right: 360px;
+}
+.energy-badge-slot-2-4-6 {
+  top: 312px;
+  right: 385px;
+}
+.energy-badge-slot-2-5-1 {
+  bottom: 225px;
+  right: 50px;
+}
+.energy-badge-slot-2-5-2 {
+  bottom: 225px;
+  right: 75px;
+}
+.energy-badge-slot-2-5-3 {
+  bottom: 225px;
+  right: 100px;
+}
+.energy-badge-slot-2-5-4 {
+  bottom: 225px;
+  right: 125px;
+}
+.energy-badge-slot-2-5-5 {
+  bottom: 225px;
+  right: 150px;
+}
+.energy-badge-slot-2-5-6 {
+  bottom: 225px;
+  right: 175px;
+}
+.energy-badge-slot-2-6-1 {
+  bottom: 225px;
+  right: 260px;
+}
+.energy-badge-slot-2-6-2 {
+  bottom: 225px;
+  right: 285px;
+}
+.energy-badge-slot-2-6-3 {
+  bottom: 225px;
+  right: 310px;
+}
+.energy-badge-slot-2-6-4 {
+  bottom: 225px;
+  right: 335px;
+}
+.energy-badge-slot-2-6-5 {
+  bottom: 225px;
+  right: 360px;
+}
+.energy-badge-slot-2-6-6 {
+  bottom: 225px;
+  right: 385px;
+}
+
+/* Player 1 Energy Badges*/
+.energy-badge-1-1-1 {
+  top: 322px;
+  left: 492px;
+}
+.energy-badge-1-1-2 {
+  top: 322px;
+  left: 522px;
+}
+.energy-badge-1-1-3 {
+  top: 322px;
+  left: 552px;
+}
+.energy-badge-1-1-4 {
+  top: 322px;
+  left: 582px;
+}
+.energy-badge-1-1-5 {
+  top: 322px;
+  left: 612px;
+}
+.energy-badge-1-1-6 {
+  top: 322px;
+  left: 642px;
+}
+.energy-badge-1-2-1 {
+  bottom: 109px;
+  left: 492px;
+}
+.energy-badge-1-2-2 {
+  bottom: 109px;
+  left: 522px;
+}
+.energy-badge-1-2-3 {
+  bottom: 109px;
+  left: 552px;
+}
+.energy-badge-1-2-4 {
+  bottom: 109px;
+  left: 582px;
+}
+.energy-badge-1-2-5 {
+  bottom: 109px;
+  left: 612px;
+}
+.energy-badge-1-2-6 {
+  bottom: 109px;
+  left: 642px;
+}
+.energy-badge-1-3-1 {
+  top: 314px;
+  left: 52px;
+}
+.energy-badge-1-3-2 {
+  top: 314px;
+  left: 77px;
+}
+.energy-badge-1-3-3 {
+  top: 314px;
+  left: 102px;
+}
+.energy-badge-1-3-4 {
+  top: 314px;
+  left: 127px;
+}
+.energy-badge-1-3-5 {
+  top: 314px;
+  left: 152px;
+}
+.energy-badge-1-3-6 {
+  top: 314px;
+  left: 177px;
+}
+.energy-badge-1-4-1 {
+  top: 314px;
+  left: 262px;
+}
+.energy-badge-1-4-2 {
+  top: 314px;
+  left: 287px;
+}
+.energy-badge-1-4-3 {
+  top: 314px;
+  left: 312px;
+}
+.energy-badge-1-4-4 {
+  top: 314px;
+  left: 337px;
+}
+.energy-badge-1-4-5 {
+  top: 314px;
+  left: 362px;
+}
+.energy-badge-1-4-6 {
+  top: 314px;
+  left: 387px;
+}
+.energy-badge-1-5-1 {
+  bottom: 227px;
+  left: 52px;
+}
+.energy-badge-1-5-2 {
+  bottom: 227px;
+  left: 77px;
+}
+.energy-badge-1-5-3 {
+  bottom: 227px;
+  left: 102px;
+}
+.energy-badge-1-5-4 {
+  bottom: 227px;
+  left: 127px;
+}
+.energy-badge-1-5-5 {
+  bottom: 227px;
+  left: 152px;
+}
+.energy-badge-1-5-6 {
+  bottom: 227px;
+  left: 177px;
+}
+.energy-badge-1-6-1 {
+  bottom: 227px;
+  left: 262px;
+}
+.energy-badge-1-6-2 {
+  bottom: 227px;
+  left: 287px;
+}
+.energy-badge-1-6-3 {
+  bottom: 227px;
+  left: 312px;
+}
+.energy-badge-1-6-4 {
+  bottom: 227px;
+  left: 337px;
+}
+.energy-badge-1-6-5 {
+  bottom: 227px;
+  left: 362px;
+}
+.energy-badge-1-6-6 {
+  bottom: 227px;
+  left: 387px;
+}
+
+/* Player 2 Energy Badges*/
+.energy-badge-2-1-1 {
+  top: 322px;
+  right: 492px;
+}
+.energy-badge-2-1-2 {
+  top: 322px;
+  right: 522px;
+}
+.energy-badge-2-1-3 {
+  top: 322px;
+  right: 552px;
+}
+.energy-badge-2-1-4 {
+  top: 322px;
+  right: 582px;
+}
+.energy-badge-2-1-5 {
+  top: 322px;
+  right: 612px;
+}
+.energy-badge-2-1-6 {
+  top: 322px;
+  right: 642px;
+}
+.energy-badge-2-2-1 {
+  bottom: 109px;
+  right: 492px;
+}
+.energy-badge-2-2-2 {
+  bottom: 109px;
+  right: 522px;
+}
+.energy-badge-2-2-3 {
+  bottom: 109px;
+  right: 552px;
+}
+.energy-badge-2-2-4 {
+  bottom: 109px;
+  right: 582px;
+}
+.energy-badge-2-2-5 {
+  bottom: 109px;
+  right: 612px;
+}
+.energy-badge-2-2-6 {
+  bottom: 109px;
+  right: 642px;
+}
+.energy-badge-2-3-1 {
+  top: 314px;
+  right: 52px;
+}
+.energy-badge-2-3-2 {
+  top: 314px;
+  right: 77px;
+}
+.energy-badge-2-3-3 {
+  top: 314px;
+  right: 102px;
+}
+.energy-badge-2-3-4 {
+  top: 314px;
+  right: 127px;
+}
+.energy-badge-2-3-5 {
+  top: 314px;
+  right: 152px;
+}
+.energy-badge-2-3-6 {
+  top: 314px;
+  right: 177px;
+}
+.energy-badge-2-4-1 {
+  top: 314px;
+  right: 262px;
+}
+.energy-badge-2-4-2 {
+  top: 314px;
+  right: 287px;
+}
+.energy-badge-2-4-3 {
+  top: 314px;
+  right: 312px;
+}
+.energy-badge-2-4-4 {
+  top: 314px;
+  right: 337px;
+}
+.energy-badge-2-4-5 {
+  top: 314px;
+  right: 362px;
+}
+.energy-badge-2-4-6 {
+  top: 314px;
+  right: 387px;
+}
+.energy-badge-2-5-1 {
+  bottom: 227px;
+  right: 52px;
+}
+.energy-badge-2-5-2 {
+  bottom: 227px;
+  right: 77px;
+}
+.energy-badge-2-5-3 {
+  bottom: 227px;
+  right: 102px;
+}
+.energy-badge-2-5-4 {
+  bottom: 227px;
+  right: 127px;
+}
+.energy-badge-2-5-5 {
+  bottom: 227px;
+  right: 152px;
+}
+.energy-badge-2-5-6 {
+  bottom: 227px;
+  right: 177px;
+}
+.energy-badge-2-6-1 {
+  bottom: 227px;
+  right: 262px;
+}
+.energy-badge-2-6-2 {
+  bottom: 227px;
+  right: 287px;
+}
+.energy-badge-2-6-3 {
+  bottom: 227px;
+  right: 312px;
+}
+.energy-badge-2-6-4 {
+  bottom: 227px;
+  right: 337px;
+}
+.energy-badge-2-6-5 {
+  bottom: 227px;
+  right: 362px;
+}
+.energy-badge-2-6-6 {
+  bottom: 227px;
+  right: 387px;
+}
+
+.unused-energy {
+  filter: brightness(30%);
+}
+.fighting-energy-1 {
+  top: 30px;
+  left: 100px;
+  border: 5px outset #432111;
+}
+.fire-energy-1 {
+  top: 30px;
+  left: 500px;
+  border: 5px outset #ef230c;
+}
+.grass-energy-1 {
+  top: 315px;
+  left: 100px;
+  border: 5px outset #92d232;
+}
+.lightning-energy-1 {
+  top: 315px;
+  left: 500px;
+  border: 5px outset #dece1e;
+}
+.psychic-energy-1 {
+  bottom: 30px;
+  left: 100px;
+  border: 5px outset #821bc2;
+}
+.water-energy-1 {
+  bottom: 30px;
+  left: 500px;
+  border: 5px outset #233cdc;
+}
+.fighting-energy-2 {
+  top: 30px;
+  right: 100px;
+  border: 5px outset #432111;
+}
+.fire-energy-2 {
+  top: 30px;
+  right: 500px;
+  border: 5px outset #ef230c;
+}
+.grass-energy-2 {
+  top: 315px;
+  right: 100px;
+  border: 5px outset #92d232;
+}
+.lightning-energy-2 {
+  top: 315px;
+  right: 500px;
+  border: 5px outset #dece1e;
+}
+.psychic-energy-2 {
+  bottom: 30px;
+  right: 100px;
+  border: 5px outset #821bc2;
+}
+.water-energy-2 {
+  bottom: 30px;
+  right: 500px;
+  border: 5px outset #233cdc;
+}
+.fighting-count1 {
+  top: 90px;
+  left: 370px;
+}
+.fire-count1 {
+  top: 90px;
+  right: 77px;
+}
+.grass-count1 {
+  top: 370px;
+  left: 370px;
+}
+.lightning-count1 {
+  top: 370px;
+  right: 77px;
+}
+.psychic-count1 {
+  top: 650px;
+  left: 370px;
+}
+.water-count1 {
+  top: 650px;
+  right: 77px;
+}
+.fighting-count2 {
+  top: 90px;
+  right: 370px;
+}
+.fire-count2 {
+  top: 90px;
+  left: 77px;
+}
+.grass-count2 {
+  top: 370px;
+  right: 370px;
+}
+.lightning-count2 {
+  top: 370px;
+  left: 77px;
+}
+.psychic-count2 {
+  top: 650px;
+  right: 370px;
+}
+.water-count2 {
+  top: 650px;
+  left: 77px;
+}
+.btn--energy {
+  top: 46.1rem;
+  font-size: 25px;
+}
+.btn--plus {
+  font-size: 3rem;
+  background-color: white;
+  padding: 0.5rem 2rem;
+}
+.plus1-1 {
+  top: 220px;
+  left: 397px;
+}
+.plus2-1 {
+  top: 220px;
+  left: 800px;
+}
+.plus3-1 {
+  top: 500px;
+  left: 397px;
+}
+.plus4-1 {
+  top: 500px;
+  left: 800px;
+}
+.plus5-1 {
+  top: 780px;
+  left: 397px;
+}
+.plus6-1 {
+  top: 780px;
+  left: 800px;
+}
+.plus1-2 {
+  top: 220px;
+  left: 505px;
+}
+.plus2-2 {
+  top: 220px;
+  left: 100px;
+}
+.plus3-2 {
+  top: 500px;
+  left: 505px;
+}
+.plus4-2 {
+  top: 500px;
+  left: 100px;
+}
+.plus5-2 {
+  top: 780px;
+  left: 505px;
+}
+.plus6-2 {
+  top: 780px;
+  left: 100px;
+}

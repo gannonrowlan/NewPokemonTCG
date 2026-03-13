@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title><%= title %></title>
+    <meta name="description" content="Pokémon Trading Card Game Plus - Play a digital version of the classic TCG!">
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/energy_styles.css" />
+    <noscript>
+      <style>main { display: none !important; }</style>
+      <div class="noscript-msg">This game requires JavaScript to play.</div>
+    </noscript>
+  </head>
+  <body>
+    <main>
+      <% for(let player=0; player<2; player++) { %>
+      <section class="player player--<%= player %><%= player === 0 ? ' player--active' : '' %>">
+        <h2 class="bench-title bench-title<%= player+1 %>">Bench</h2>
+        <h2 class="name name<%= player+1 %>" id="name--<%= player %>"><%= players[player] %></h2>
+        
+        <!-- Active slots -->
+        <% for(let i=1; i<=2; i++) { %>
+          <div class="card-slot-active slot-active<%= i %>-<%= player+1 %>"></div>
+        <% } %>
+        <!-- Bench slots -->
+        <% for(let i=1; i<=benchSlots; i++) { %>
+          <div class="card-slot-bench slot-bench<%= i %>-<%= player+1 %>"></div>
+        <% } %>
+        <!-- Active Pokémon images -->
+        <img src="/Pokemon/Base_43.jpg" alt="Active Pokémon" class="active top-active<%= player+1 %> hidden"/>
+        <img src="/Pokemon/Base_43.jpg" alt="Bottom Active Pokémon" class="active bottom-active<%= player+1 %> hidden"/>
+        <!-- Benched Pokémon images -->
+        <% for(let i=1; i<=benchSlots; i++) { %>
+          <img src="/Pokemon/Base_43.jpg" alt="Benched Pokémon" class="bench bench<%= i %>-<%= player+1 %> hidden"/>
+        <% } %>
+        <!-- Energy badge slots -->
+        <% for(let j=1; j<=2; j++) { %>
+          <% for(let i=1; i<=energySlots; i++) { %>
+            <div class="energy-badge-slot-active energy-badge-slot-<%= player+1 %>-<%= j %>-<%= i %> hidden"></div>
+          <% } %>
+        <% } %>
+        <% for(let b=3; b<=benchSlots+2; b++) { %>
+          <% for(let i=1; i<=energySlots; i++) { %>
+            <div class="energy-badge-slot-bench energy-badge-slot-<%= player+1 %>-<%= b %>-<%= i %> hidden"></div>
+          <% } %>
+        <% } %>
+        <!-- Energy badge images for actives and bench -->
+        <% for(let j=1; j<=2; j++) { %>
+          <% for(let i=1; i<=energySlots; i++) { %>
+            <img src="/Energy/fighting_energy_badge.png" alt="Energy Badge" class="energy-badge-active energy-badge-<%= player+1 %>-<%= j %>-<%= i %> hidden"/>
+          <% } %>
+        <% } %>
+        <% for(let b=3; b<=benchSlots+2; b++) { %>
+          <% for(let i=1; i<=energySlots; i++) { %>
+            <img src="/Energy/fighting_energy_badge.png" alt="Bench Energy Badge" class="energy-badge-bench energy-badge-<%= player+1 %>-<%= b %>-<%= i %> hidden"/>
+          <% } %>
+        <% } %>
+        <!-- Health display for actives -->
+        <% for(let i=1; i<=2; i++) { %>
+          <div class="health active-health-<%= i === 1 ? 'top' : 'bottom' %><%= player+1 %>">
+            <h2 class="hitpoint">HP:</h2>
+            <div class="hitpoint current-health" id="active-health-<%= i %>-<%= player+1 %>">- / -</div>
+          </div>
+          <button class="btn btn--retreat hidden" id="retreat-btn-<%= i %>-<%= player+1 %>">Retreat</button>
+        <% } %>
+        <!-- Health display for bench -->
+        <% for(let i=1; i<=benchSlots; i++) { %>
+          <div class="health bench-health bench-health-<%= i %>-<%= player+1 %>">
+            <div class="hitpoint current-bench-health" id="bench-health-<%= i %>-<%= player+1 %>">HP: - / -</div>
+          </div>
+        <% } %>
+        <!-- Hand menu (mirrors discard grid; unlimited cards) -->
+        <div
+          class="hand-menu <%= player===0 ? 'hand-menu-right' : 'hand-menu-left' %> hidden"
+          id="hand-menu-<%= player+1 %>"
+        >
+          <h3 class="hand-title">Hand</h3>
+          <div class="hand-grid" id="hand-grid-<%= player+1 %>"></div>
+        </div>
+        <!-- Discard pile viewer -->
+        <div class="discard-menu hidden discard-menu-<%= player===0 ? 'right' : 'left' %>" id="discard-menu-<%= player+1 %>">
+          <h3 class="discard-title">Discard Pile</h3>
+          <div class="discard-grid" id="discard-grid-<%= player+1 %>"></div>
+        </div>
+        <!-- Trainer menu -->
+        <div class="trainer-menu hidden" id="trainer-menu-<%= player+1 %>">
+          <div class="trainer-slot" id="trainer-slot-<%= player+1 %>"></div>
+          <img class="trainer-card trainer-card<%= player+1 %> hidden" src="/Pokemon/Base_70.jpg" alt="Trainer Card"/>
+          <button class="btn btn--trainer--confirm btn--trainer--confirm<%= player+1 %> hidden">Confirm</button>
+          <button class="btn btn--trainer--cancel<%= player+1 %>">Cancel</button>
+        </div>
+        <!-- Energy menu -->
+        <div class="energy-menu hidden" id="energy-cards-<%= player === 0 ? 2 : 1 %>">
+          <% for(let i=1; i<=energySlots; i++) { %>
+            <button class="btn btn--plus plus<%= i %>-<%= player+1 %>"><strong>+</strong></button>
+          <% } %>
+          <div class="energy-count fighting-count<%= player+1 %>">0</div>
+          <div class="energy-count fire-count<%= player+1 %>">0</div>
+          <div class="energy-count grass-count<%= player+1 %>">0</div>
+          <div class="energy-count lightning-count<%= player+1 %>">0</div>
+          <div class="energy-count psychic-count<%= player+1 %>">0</div>
+          <div class="energy-count water-count<%= player+1 %>">0</div>
+          <img class="fighting-energy-<%= player+1 %> energy-card unused-energy" src="/Energy/Base_fighting_energy.jpg" alt="Fighting Energy"/>
+          <img class="fire-energy-<%= player+1 %> energy-card unused-energy" src="/Energy/Base_fire_energy.jpg" alt="Fire Energy"/>
+          <img class="grass-energy-<%= player+1 %> energy-card unused-energy" src="/Energy/Base_grass_energy.jpg" alt="Grass Energy"/>
+          <img class="lightning-energy-<%= player+1 %> energy-card unused-energy" src="/Energy/Base_lightning_energy.jpg" alt="Lightning Energy"/>
+          <img class="psychic-energy-<%= player+1 %> energy-card unused-energy" src="/Energy/Base_psychic_energy.jpg" alt="Psychic Energy"/>
+          <img class="water-energy-<%= player+1 %> energy-card unused-energy" src="/Energy/Base_water_energy.jpg" alt="Water Energy"/>
+        </div>
+        <!-- Hand and deck info -->
+        <button class="btn btn--hand<%= player+1 %> hidden">Hand</button>
+        <button class="btn btn--discard<%= player+1 %> hidden">Discard</button>
+        <div class="remaining-cards<%= player+1 %> hidden">Cards Remaining In Deck: 33</div>
+      </section>
+      <% } %>
+
+      <!-- Board-wide controls -->
+      <button class="btn btn--new">🔄 New game</button>
+      <button class="btn btn--end hidden">End Turn</button>
+      <button class="btn btn--attack hidden">Attack!</button>
+      <button class="btn btn--energy hidden">Energy: 1</button>
+
+      <!-- Prize card menu (4 facedown) -->
+      <div class="prize-card-menu hidden">
+        <div class="prize-card-slot prize-card-slot-1"></div>
+        <div class="prize-card-slot prize-card-slot-2"></div>
+        <div class="prize-card-slot prize-card-slot-3"></div>
+        <div class="prize-card-slot prize-card-slot-4"></div>
+
+        <!-- show card backs; JS will handle random draw -->
+        <img class="prize-card prize-card-1" src="/Pokemon/facedown.jpg" alt="Prize Card (facedown)"/>
+        <img class="prize-card prize-card-2" src="/Pokemon/facedown.jpg" alt="Prize Card (facedown)"/>
+        <img class="prize-card prize-card-3" src="/Pokemon/facedown.jpg" alt="Prize Card (facedown)"/>
+        <img class="prize-card prize-card-4" src="/Pokemon/facedown.jpg" alt="Prize Card (facedown)"/>
+        <button class="btn btn--take-prize hidden">Take Prize</button>
+      </div>
+      <!-- Global overlay that matches the hand/energy look -->
+      <div class="board-overlay hidden" id="board-overlay"></div>
+
+      <!-- Slim side panel for attacks (only visible during attack selection) -->
+      <aside class="attack-panel hidden" id="attack-panel">
+        <h3 id="attack-panel-title">Choose an attack</h3>
+        <div id="attack-panel-options"></div>
+        <button id="cancel-attack" class="btn btn--attack-cancel">Cancel</button>
+      </aside>
+      <div id="win-modal" class="win-modal hidden" role="dialog" aria-live="polite" aria-modal="true">
+        <div class="win-box">
+          <div id="win-title" class="win-title">Player 1 wins!</div>
+          <div id="win-reason" class="win-reason">Reason text</div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Scripts (ensure the order!) -->
+    <script src="/js/basePokemonData.js"></script>
+    <script src="/js/deckGeneration.js"></script>
+    <script src="/js/UI_Utilities.js"></script>
+    <script src="/js/utils.js"></script>
+    <script src="/js/energy.js"></script>
+    <script src="/js/attack.js"></script>
+    <script src="/js/script.js"></script>
+  </body>
+</html>
+
