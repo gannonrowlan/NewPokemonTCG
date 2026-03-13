@@ -1,6 +1,7 @@
 import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import indexRoutes from './routes/index.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -14,7 +15,6 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
 // Routes
-import indexRoutes from './routes/index.js';
 app.use('/', indexRoutes);
 
 // 404 error page

@@ -56,6 +56,7 @@
     const badges = getEnergyBadgesForActiveIndex(activeIdx);
     const slots  = getEnergySlotsForActiveIndex(activeIdx);
     [...badges, ...slots].forEach(el => {
+      if (!el) return;
       el.classList.add('hidden');
       if (el.tagName === 'IMG') el.src = '';
     });
@@ -72,7 +73,7 @@
   }
 
   function getSelectedEnergyTypeIdx() {
-    for (let p of ['player1', 'player2']) {
+    for (const p of ['player1', 'player2']) {
       for (let i = 0; i < ENERGY_TYPES; i++) {
         if (global.selectedCard === UI.energy.cards[p][i]) return i;
       }
@@ -81,17 +82,24 @@
   }
 
   function decreaseEnergy() {
-    let playerKey = null, energyIndex = null;
-    for (let p of ['player1', 'player2']) {
+    let playerKey = null;
+    let energyIndex = null;
+
+    for (const p of ['player1', 'player2']) {
       for (let i = 0; i < ENERGY_TYPES; i++) {
-        if (global.selectedCard === UI.energy.cards[p][i]) { playerKey = p; energyIndex = i; }
+        if (global.selectedCard === UI.energy.cards[p][i]) {
+          playerKey = p;
+          energyIndex = i;
+          break;
+        }
+        if (playerKey) break;
       }
     }
-    if (playerKey !== null && energyIndex !== null) {
-      energyCounts[playerKey][energyIndex]--;
-      UI.energy.count[playerKey][energyIndex].textContent = energyCounts[playerKey][energyIndex];
-      if (energyCounts[playerKey][energyIndex] === 0) global.selectedCard.classList.add('unused-energy');
-    }
+    if (playerKey === null || energyIndex === null) return;
+
+    energyCounts[playerKey][energyIndex] = Math.max(0, energyCounts[playerKey][energyIndex] - 1);
+    UI.energy.count[playerKey][energyIndex].textContent = energyCounts[playerKey][energyIndex];
+    if (energyCounts[playerKey][energyIndex] === 0) global.selectedCard.classList.add('unused-energy');
   }
 
   function changeEnergyBadgeImg(selectedBadge) {
@@ -160,7 +168,8 @@
     if (!img || img.classList.contains('hidden')) return false;
 
     const cardId = U.getCardIdFromImg(img);
-    const cost = (baseSet[cardId-1]?.retreatCost|0);
+    if (!cardId) return false;
+    const cost = (baseSet[cardId - 1]?.retreatCost | 0);
 
     // free retreat if you have any benched Pokémon
     if (cost === 0) return U.hasAnyBenchPokemon(pIdx);

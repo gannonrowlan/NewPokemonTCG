@@ -10,16 +10,6 @@
 const START_HAND_SIZE = 7;
 const TOTAL_DECK_SIZE = 40;
 
-// Original recipe constants (used by generatePlayerDeck)
-const NUM_RARE_BASE = 2;
-const NUM_UNCOMMON_BASE = 2;
-const NUM_COMMON_BASE = 2;
-const NUM_STAGE_ONE_SETS = 3;
-const NUM_STAGE_TWO_SETS = 2;
-const NUM_COMMON_TRAINERS = 8;
-const NUM_UNCOMMON_TRAINERS = 6;
-const NUM_RARE_TRAINERS = 4;
-
 // Trainer ID ranges for Base Set
 const COMMON_TRAINER_START = 91;
 const UNCOMMON_TRAINER_START = 80;
@@ -95,7 +85,10 @@ function _typesOf(card) {
 function _isType(id, type) {
   return _typesOf(baseSet[id - 1]).includes(String(type).toLowerCase());
 }
-function _pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+function _pick(arr) {
+  if (!Array.isArray(arr) || arr.length === 0) return null;
+  return arr[Math.floor(Math.random() * arr.length)];
+}
 
 function _trainerIdsFromRange(start, count) {
   const ids = [];
@@ -248,10 +241,13 @@ window.randomTypesForTwoPlayers = function () {
 
   // Try to give P2 two types disjoint from P1 while keeping primary s2-capable
   const allV = _viableTypes();
-  const s2Capable = allV.filter(t => _stagePoolsForType(t).s2.length > 0 && !p1.includes(t));
-  const A = s2Capable.length ? _pick(s2Capable) : _pick(allV.filter(t => _stagePoolsForType(t).s2.length > 0));
-  const rest = allV.filter(t => !p1.includes(t) && t !== A);
-  const B = rest.length ? _pick(rest) : _pick(allV.filter(t => t !== A)) || A;
+  const fallbackPool = allV.length ? allV : ALL_TYPES;
+  const s2Capable = fallbackPool.filter(t => _stagePoolsForType(t).s2.length > 0 && !p1.includes(t));
+  const A = s2Capable.length
+    ? _pick(s2Capable)
+    : (_pick(fallbackPool.filter(t => _stagePoolsForType(t).s2.length > 0)) || _pick(fallbackPool));
+  const rest = fallbackPool.filter(t => !p1.includes(t) && t !== A);
+  const B = rest.length ? _pick(rest) : (_pick(fallbackPool.filter(t => t !== A)) || A);
 
   return { p1, p2: [A, B] };
 };
@@ -266,7 +262,7 @@ window.generatePlayerDeckV2 = function(types) {
   const chosen = (Array.isArray(types) && types.length >= 2)
   ? types
   : _sampleTypePairWithPrimaryConstraint();
-  const [A, B] = chosen;
+  const [A, B] = chosen.map(_normalizeTypeName);
   // Expose last-chosen types for debugging/UX if wanted
   if (!window._lastTypesChosenP1) window._lastTypesChosenP1 = chosen;
   else window._lastTypesChosenP2 = chosen;
