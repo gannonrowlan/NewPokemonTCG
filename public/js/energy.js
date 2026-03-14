@@ -34,6 +34,30 @@
     return [];
   }
 
+  function getEnergyBadgesForBenchIdx(benchIdx) {
+    if (benchIdx === 0) return UI.energyBadges.BenchSlot1_1;
+    if (benchIdx === 1) return UI.energyBadges.BenchSlot2_1;
+    if (benchIdx === 2) return UI.energyBadges.BenchSlot3_1;
+    if (benchIdx === 3) return UI.energyBadges.BenchSlot4_1;
+    if (benchIdx === 4) return UI.energyBadges.BenchSlot1_2;
+    if (benchIdx === 5) return UI.energyBadges.BenchSlot2_2;
+    if (benchIdx === 6) return UI.energyBadges.BenchSlot3_2;
+    if (benchIdx === 7) return UI.energyBadges.BenchSlot4_2;
+    return [];
+  }
+
+  function getEnergySlotsForBenchIdx(benchIdx) {
+    if (benchIdx === 0) return UI.energySlots.BenchSlot1_1;
+    if (benchIdx === 1) return UI.energySlots.BenchSlot2_1;
+    if (benchIdx === 2) return UI.energySlots.BenchSlot3_1;
+    if (benchIdx === 3) return UI.energySlots.BenchSlot4_1;
+    if (benchIdx === 4) return UI.energySlots.BenchSlot1_2;
+    if (benchIdx === 5) return UI.energySlots.BenchSlot2_2;
+    if (benchIdx === 6) return UI.energySlots.BenchSlot3_2;
+    if (benchIdx === 7) return UI.energySlots.BenchSlot4_2;
+    return [];
+  }
+
   function elevateEnergyForIndex(activeIdx, on) {
     const els = [...getEnergyBadgesForActiveIndex(activeIdx), ...getEnergySlotsForActiveIndex(activeIdx)];
     els.forEach(el => {
@@ -66,6 +90,13 @@
   function clearEnergyForBenchIndex(benchIdx) {
     if (benchIdx < 0 || benchIdx >= benchAttachedEnergy.length) return;
     benchAttachedEnergy[benchIdx] = Array(ENERGY_TYPES).fill(0);
+    const badges = getEnergyBadgesForBenchIdx(benchIdx);
+    const slots = getEnergySlotsForBenchIdx(benchIdx);
+    [...badges, ...slots].forEach(el => {
+      if (!el) return;
+      el.classList.add('hidden');
+      if (el.tagName === 'IMG') el.src = '';
+    });
   }
 
   function clearSelectedEnergy() {
@@ -170,6 +201,14 @@
       case UI.activePokemon[1]: getNextBadge(UI.energySlots.TopActive2, UI.energyBadges.TopActive2); break;
       case UI.activePokemon[2]: getNextBadge(UI.energySlots.BottomActive1, UI.energyBadges.BottomActive1); break;
       case UI.activePokemon[3]: getNextBadge(UI.energySlots.BottomActive2, UI.energyBadges.BottomActive2); break;
+      case UI.benchPokemon[0]: getNextBadge(UI.energySlots.BenchSlot1_1, UI.energyBadges.BenchSlot1_1); break;
+      case UI.benchPokemon[1]: getNextBadge(UI.energySlots.BenchSlot2_1, UI.energyBadges.BenchSlot2_1); break;
+      case UI.benchPokemon[2]: getNextBadge(UI.energySlots.BenchSlot3_1, UI.energyBadges.BenchSlot3_1); break;
+      case UI.benchPokemon[3]: getNextBadge(UI.energySlots.BenchSlot4_1, UI.energyBadges.BenchSlot4_1); break;
+      case UI.benchPokemon[4]: getNextBadge(UI.energySlots.BenchSlot1_2, UI.energyBadges.BenchSlot1_2); break;
+      case UI.benchPokemon[5]: getNextBadge(UI.energySlots.BenchSlot2_2, UI.energyBadges.BenchSlot2_2); break;
+      case UI.benchPokemon[6]: getNextBadge(UI.energySlots.BenchSlot3_2, UI.energyBadges.BenchSlot3_2); break;
+      case UI.benchPokemon[7]: getNextBadge(UI.energySlots.BenchSlot4_2, UI.energyBadges.BenchSlot4_2); break;
     }
   }
 
@@ -194,8 +233,36 @@
 
     if (benchIdx !== -1) {
       decreaseEnergy();
+      displayEnergy(pokemon);
       benchAttachedEnergy[benchIdx][typeIdx]++;
       clearSelectedEnergy();
+    }
+  }
+
+  function redrawEnergyForBenchIndex(benchIdx){
+    const slots = getEnergySlotsForBenchIdx(benchIdx);
+    const badges = getEnergyBadgesForBenchIdx(benchIdx);
+    const badgeSrc = [
+      `Energy/fighting_energy_badge.png`,
+      `Energy/fire_energy_badge.png`,
+      `Energy/grass_energy_badge.png`,
+      `Energy/lightning_energy_badge.png`,
+      `Energy/psychic_energy_badge.png`,
+      `Energy/water_energy_badge.png`,
+    ];
+    [...slots, ...badges].forEach(el => {
+      el.classList.add('hidden');
+      if (el.tagName === 'IMG') el.src = '';
+    });
+    let k = 0;
+    for (let type = 0; type < ENERGY_TYPES; type++) {
+      for (let c = 0; c < benchAttachedEnergy[benchIdx][type]; c++) {
+        if (!slots[k] || !badges[k]) return;
+        slots[k].classList.remove('hidden');
+        badges[k].src = badgeSrc[type];
+        badges[k].classList.remove('hidden');
+        k++;
+      }
     }
   }
 
@@ -318,6 +385,7 @@
     attachedEnergy[activeIdx] = [...benchAttachedEnergy[benchGlobalIdx]];
     benchAttachedEnergy[benchGlobalIdx] = prevActiveEnergy;
     redrawEnergyForActiveIndex(activeIdx);
+    redrawEnergyForBenchIndex(benchGlobalIdx);
 
     global.hasRetreatedThisTurn = true;
     refreshRetreatButtons();
@@ -380,7 +448,7 @@
     if (benchIdx < 0 || benchIdx >= benchAttachedEnergy.length) return;
 
     attachedEnergy[activeIdx] = [...benchAttachedEnergy[benchIdx]];
-    benchAttachedEnergy[benchIdx] = Array(ENERGY_TYPES).fill(0);
+    clearEnergyForBenchIndex(benchIdx);
     redrawEnergyForActiveIndex(activeIdx);
     refreshRetreatButtons();
   }
