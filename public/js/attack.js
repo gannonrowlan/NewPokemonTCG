@@ -270,6 +270,7 @@
       clearStatus(attackerIdx);
     }
 
+    const attackerOwner = U.ownerOfActiveIdx(attackerIdx);
     let damage = Number(attack.damage) || 0;
     const attackName = attack.name;
     const attackerEnergy = global.attachedEnergy[attackerIdx]?.reduce((a, b) => a + b, 0) || 0;
