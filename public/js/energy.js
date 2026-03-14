@@ -161,6 +161,7 @@
     if (global.hasRetreatedThisTurn) return false;
 
     const pIdx = U.ownerOfActiveIdx(activeIdx);
+    if (typeof global.isPlayersOpeningTurn === 'function' && global.isPlayersOpeningTurn(pIdx)) return false;
     const me = (U.whoIsActive ? U.whoIsActive() : (UI.players[0].classList.contains('player--active') ? 0 : 1));
     if (pIdx !== me) return false;
 

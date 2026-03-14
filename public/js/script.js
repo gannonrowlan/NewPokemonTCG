@@ -44,11 +44,17 @@ function getMenuIndex(player) { return player === 0 ? 1 : 0; }
 function getHandIndex(player) { return player === 0 ? 1 : 0; } // if you swap hands too
 
 // Restricts first-turn bench placement until both actives are filled
+function isPlayersOpeningTurn(pIdx) {
+  return (pIdx === 0 && round === 1) || (pIdx === 1 && round === 2);
+}
+
+window.isPlayersOpeningTurn = isPlayersOpeningTurn;
+
 function cardPlacement(card) {
   if (!cardSelected) return false;
   const selectedCardId = getCardIdFromImg(selectedCard);
   // First turn restriction
-  let isFirstTurn = (activePlayer === 0 && round === 1) || (activePlayer === 1 && round === 2);
+  const isFirstTurn = isPlayersOpeningTurn(activePlayer);
   const placingToBench = UI.benchPokemon.includes(card);
   if (placingToBench) {
     const pIdx = (activePlayer === 0) ? 0 : 1;
@@ -236,6 +242,12 @@ const endTurn = function (top, bottom) {
   const bottomHidden = bottom.classList.contains('hidden');
   const bothPresent  = !topHidden && !bottomHidden;
   const hasEmpty     = topHidden || bottomHidden;
+
+  // On each player's opening turn, both Active slots are mandatory.
+  if (isPlayersOpeningTurn(pIdx) && hasEmpty) {
+    UI.endBtn.classList.add('hidden');
+    return;
+  }
 
   // If both Actives are present, we can always show End Turn (menus/round rules handled elsewhere)
   if (bothPresent) {
