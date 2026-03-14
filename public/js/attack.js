@@ -51,19 +51,8 @@
     if (activeIdx == null || activeIdx < 0) return;
     battleState.statusByActiveIdx[activeIdx] = status;
   }
-  function discardAttachedEnergy(activeIdx, count, preferredTypeIdx = -1) {
-    let toDiscard = count;
-    if (preferredTypeIdx >= 0) {
-      const used = Math.min(global.attachedEnergy[activeIdx][preferredTypeIdx], toDiscard);
-      global.attachedEnergy[activeIdx][preferredTypeIdx] -= used;
-      toDiscard -= used;
-    }
-    for (let i = 0; i < global.attachedEnergy[activeIdx].length && toDiscard > 0; i++) {
-      const used = Math.min(global.attachedEnergy[activeIdx][i], toDiscard);
-      global.attachedEnergy[activeIdx][i] -= used;
-      toDiscard -= used;
-    }
-    E.redrawEnergyForActiveIndex?.(activeIdx);
+  function discardAttachedEnergy(activeIdx, count, preferredTypeIdx = -1, reason = 'Choose Energy type to discard') {
+    E.discardEnergyFromActive?.(activeIdx, count, { preferredTypeIdx, reason, redraw: true });
   }
 
   function elevateHpBoxForIndex(activeIdx, on) {
@@ -362,15 +351,15 @@
     }
     if (attackName === 'Leech Seed') healActiveByIdx(attackerIdx, 10);
     if (attackName === 'Recover') {
-      discardAttachedEnergy(attackerIdx, 1, U.getEnergyIndex(attackerCard.type));
+      discardAttachedEnergy(attackerIdx, 1, U.getEnergyIndex(attackerCard.type), 'Choose an Energy to discard for Recover');
       const attackerHpEl = U.getHpElForActiveIndex(attackerIdx);
       const hp = parseHp(attackerHpEl);
       if (hp) setHp(attackerHpEl, hp.max, hp.max);
     }
-    if (attackName === 'Fire Spin') discardAttachedEnergy(attackerIdx, 2);
-    if (attackName === 'Flamethrower' || attackName === 'Fire Blast') discardAttachedEnergy(attackerIdx, 1, U.getEnergyIndex('fire'));
-    if (attackName === 'Thunderbolt') discardAttachedEnergy(attackerIdx, 99, U.getEnergyIndex('lightning'));
-    if (attackName === 'Hyper Beam' || attackName === 'Whirlpool') discardAttachedEnergy(defenderIdx, 1);
+    if (attackName === 'Fire Spin') discardAttachedEnergy(attackerIdx, 2, -1, 'Choose Energy to discard for Fire Spin');
+    if (attackName === 'Flamethrower' || attackName === 'Fire Blast') discardAttachedEnergy(attackerIdx, 1, U.getEnergyIndex('fire'), 'Choose an Energy to discard for this attack');
+    if (attackName === 'Thunderbolt') discardAttachedEnergy(attackerIdx, 99, U.getEnergyIndex('lightning'), 'Choose Energy to discard for Thunderbolt');
+    if (attackName === 'Hyper Beam' || attackName === 'Whirlpool') discardAttachedEnergy(defenderIdx, 1, -1, 'Choose an Energy to discard from the Defending Pokémon');
 
     if (attackName === 'Double-Edge') damageActiveByIdx(attackerIdx, 80);
     if (attackName === 'Submission') damageActiveByIdx(attackerIdx, 20);

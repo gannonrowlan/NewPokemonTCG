@@ -299,12 +299,49 @@
     let toPay = (baseSet[cardId-1]?.retreatCost|0);
     if (toPay <= 0) return;
 
-    for (let t = 0; t < ENERGY_TYPES && toPay > 0; t++){
-      const used = Math.min(attachedEnergy[activeIdx][t], toPay);
-      attachedEnergy[activeIdx][t] -= used;
-      toPay -= used;
+    discardEnergyFromActive(activeIdx, toPay, {
+      reason: 'Retreat cost: choose Energy to discard',
+      redraw: true,
+    });
+  }
+
+  function getEnergyTypeName(typeIdx) {
+    return ['Fighting', 'Fire', 'Grass', 'Lightning', 'Psychic', 'Water'][typeIdx] || `Type ${typeIdx}`;
+  }
+
+  function promptEnergyTypeChoice(activeIdx, options = {}) {
+    const { preferredTypeIdx = -1, reason = 'Choose Energy type to discard' } = options;
+    const pool = attachedEnergy[activeIdx];
+    if (!Array.isArray(pool)) return -1;
+
+    // If a preferred type is required and available, honor it automatically.
+    if (preferredTypeIdx >= 0 && pool[preferredTypeIdx] > 0) return preferredTypeIdx;
+
+    const available = [];
+    for (let i = 0; i < pool.length; i++) if (pool[i] > 0) available.push(i);
+    if (!available.length) return -1;
+    if (available.length === 1) return available[0];
+
+    const promptLines = available
+      .map((idx) => `${idx}: ${getEnergyTypeName(idx)} (${pool[idx]})`)
+      .join('\n');
+    const pick = prompt(`${reason}\n${promptLines}`);
+    const chosen = Number.parseInt(pick, 10);
+    return available.includes(chosen) ? chosen : -1;
+  }
+
+  function discardEnergyFromActive(activeIdx, count = 1, options = {}) {
+    let remaining = Math.max(0, count | 0);
+    const { preferredTypeIdx = -1, reason = 'Choose Energy type to discard', redraw = true } = options;
+
+    while (remaining > 0) {
+      const typeIdx = promptEnergyTypeChoice(activeIdx, { preferredTypeIdx, reason });
+      if (typeIdx < 0) break;
+      attachedEnergy[activeIdx][typeIdx] = Math.max(0, attachedEnergy[activeIdx][typeIdx] - 1);
+      remaining--;
     }
-    redrawEnergyForActiveIndex(activeIdx);
+    if (redraw) redrawEnergyForActiveIndex(activeIdx);
+    return count - remaining;
   }
 
   function redrawEnergyForActiveIndex(activeIdx){
@@ -465,6 +502,7 @@
     clearEnergyForActiveIndex, elevateEnergyForIndex, redrawEnergyForActiveIndex,
     totalEnergyOnActive, canRetreatFrom, payRetreatCost,
     beginRetreatSelection, refreshRetreatButtons, swapActiveWithBench,
+    promptEnergyTypeChoice, discardEnergyFromActive,
     clearEnergyForBenchIndex, moveBenchEnergyToActive, clearSelectedEnergy,
     initUI,
   };
@@ -489,6 +527,7 @@
   global.totalEnergyOnActive = totalEnergyOnActive;
   global.canRetreatFrom = canRetreatFrom;
   global.payRetreatCost = payRetreatCost;
+  global.discardEnergyFromActive = discardEnergyFromActive;
   global.beginRetreatSelection = beginRetreatSelection;
   global.refreshRetreatButtons = refreshRetreatButtons;
 })(window);

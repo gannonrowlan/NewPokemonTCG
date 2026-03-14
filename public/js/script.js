@@ -692,15 +692,8 @@ function chooseBenchIndex(pIdx, msg = 'Choose Benched index:') {
   const idx = Number.parseInt(pick, 10);
   return list.includes(idx) ? idx : null;
 }
-function discardOneEnergyFromActive(activeIdx, count = 1) {
-  let toRemove = count;
-  for (let i = 0; i < attachedEnergy[activeIdx].length && toRemove > 0; i++) {
-    const used = Math.min(attachedEnergy[activeIdx][i], toRemove);
-    attachedEnergy[activeIdx][i] -= used;
-    toRemove -= used;
-  }
-  redrawEnergyForActiveIndex(activeIdx);
-  return count - toRemove;
+function discardOneEnergyFromActive(activeIdx, count = 1, reason = 'Choose Energy type to discard') {
+  return window.Game?.Energy?.discardEnergyFromActive?.(activeIdx, count, { reason, redraw: true }) || 0;
 }
 
 function canPlayTrainerCard(cardId, pIdx) {
@@ -737,8 +730,8 @@ function resolveTrainerCard(cardId, pIdx) {
       const own = chooseActiveIndex(pIdx, { message: 'Choose your Active to discard 1 Energy from:' });
       const foe = chooseActiveIndex(opp, { message: 'Choose opponent Active to remove up to 2 Energy from:' });
       if (own == null || foe == null) return false;
-      if (discardOneEnergyFromActive(own, 1) < 1) return false;
-      discardOneEnergyFromActive(foe, 2);
+      if (discardOneEnergyFromActive(own, 1, 'Choose 1 Energy to discard from your Active Pokémon') < 1) return false;
+      discardOneEnergyFromActive(foe, 2, "Choose up to 2 Energy to discard from opponent's Active Pokémon");
       return true;
     }
     case 80: {
@@ -782,7 +775,7 @@ function resolveTrainerCard(cardId, pIdx) {
     }
     case 90: {
       const own = chooseActiveIndex(pIdx, { message: 'Choose damaged Active for Super Potion:', requireDamaged: true });
-      if (own == null || discardOneEnergyFromActive(own, 1) < 1) return false;
+      if (own == null || discardOneEnergyFromActive(own, 1, 'Choose 1 Energy to discard for Super Potion') < 1) return false;
       const hpEl = getHpElForActiveIndex(own);
       const hp = parseHpText(hpEl?.textContent || '');
       if (!hp) return false;
@@ -794,7 +787,7 @@ function resolveTrainerCard(cardId, pIdx) {
       return true;
     case 92: {
       const foe = chooseActiveIndex(opp, { message: 'Choose opponent Active to remove 1 Energy from:' });
-      return foe != null && discardOneEnergyFromActive(foe, 1) > 0;
+      return foe != null && discardOneEnergyFromActive(foe, 1, "Choose 1 Energy to discard from opponent's Active Pokémon") > 0;
     }
     case 93: {
       const foeActive = chooseActiveIndex(opp, { message: 'Choose opponent Active to switch out:' });
