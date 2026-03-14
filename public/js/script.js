@@ -297,6 +297,29 @@ const openTrainer = function (trainerMenu, handBtn) {
   UI.newBtn.classList.add('hidden');
   handBtn.classList.add('hidden');
 };
+function getPendingTrainerId(p) {
+  let id = getCardIdFromImg(UI.trainerCard[p]);
+  if (!id && selectedCard) {
+    const m = (selectedCard.src || '').match(/Base_(\d+)\.jpg$/);
+    id = m ? parseInt(m[1], 10) : null;
+  }
+  return id;
+}
+
+function clearTrainerSelection(p) {
+  UI.trainerCard[p].classList.add('hidden');
+  UI.trainerCard[p].src = '';
+  selectedCard = null;
+  cardSelected = false;
+}
+
+function returnTrainerCardToHand(p) {
+  const id = getPendingTrainerId(p);
+  if (id) {
+    putCardIntoHand(activePlayer, id);
+    sortHand(activePlayer);
+  }
+}
 const openHand = function (hand) {
   const opening = hand.classList.contains('hidden'); // true if we're about to open it
   hand.classList.toggle('hidden');
@@ -1409,29 +1432,27 @@ for (let i = 0; i < 4; i++) {
 [0, 1].forEach(p => {
   UI.trainerBtn.confirm[p].addEventListener('click', function () {
     // Read ID from the VISIBLE big trainer card (hand thumbnail is hidden by cardPlacement)
-    let id = getCardIdFromImg(UI.trainerCard[p]);
-    if (!id && selectedCard) {
-      // fallback: parse from the old hand element's src if present
-      const m = (selectedCard.src || '').match(/Base_(\d+)\.jpg$/);
-      id = m ? parseInt(m[1], 10) : null;
-    }
+    const id = getPendingTrainerId(p);
 
     if (id && resolveTrainerCard(id, activePlayer)) {
       addToDiscard(activePlayer, id);   // push into the active player's discard + re-render grid
       trainerPlayedThisTurn = true;
     } else if (id) {
       alert('Trainer card was not played (requirements were not met).');
+      returnTrainerCardToHand(p);
     }
 
     // Clear the big trainer card and close the menu
-    UI.trainerCard[p].classList.add('hidden');
-    UI.trainerCard[p].src = '';
+    clearTrainerSelection(p);
 
     closeTrainer(UI.trainerMenu[p], UI.handBtn[p], UI.trainerBtn.confirm[p]);
+  });
 
     // The hand removal already happened in cardPlacement(); just clear selection state
-    selectedCard = null;
-    cardSelected = false;
+     UI.trainerBtn.cancel[p].addEventListener('click', function () {
+    returnTrainerCardToHand(p);
+    clearTrainerSelection(p);
+    closeTrainer(UI.trainerMenu[p], UI.handBtn[p], UI.trainerBtn.confirm[p]);
   });
 });
 
