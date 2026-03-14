@@ -350,8 +350,10 @@ function forceCloseAllMenus() {
 
 function switchPlayer() {
   sortHand();
+  window.Game?.Attack?.onTurnEnd?.(activePlayer);
   round++;
   activePlayer = activePlayer === 0 ? 1 : 0;
+  window.Game?.Attack?.onTurnStart?.(activePlayer);
   forceCloseAllMenus();
   UI.players[0].classList.toggle('player--active', activePlayer === 0);
   UI.players[1].classList.toggle('player--active', activePlayer === 1);
