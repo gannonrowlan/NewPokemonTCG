@@ -32,6 +32,7 @@ let activePlayer,
   player2ActiveHP = [null, null],
   player2BenchHP = [null, null, null, null],
   lastAttackKO = false,
+  trainerPlayedThisTurn = false,
   hasRetreatedThisTurn = false,
   koCount = { player1: 0, player2: 0 },
   discardPiles = { player1: [], player2: [] },
@@ -366,6 +367,7 @@ function switchPlayer() {
   round++;
   activePlayer = activePlayer === 0 ? 1 : 0;
   window.Game?.Attack?.onTurnStart?.(activePlayer);
+  trainerPlayedThisTurn = false;
   forceCloseAllMenus();
   UI.players[0].classList.toggle('player--active', activePlayer === 0);
   UI.players[1].classList.toggle('player--active', activePlayer === 1);
@@ -648,6 +650,184 @@ function addToDiscard(pIdx, cardId) {
   renderDiscardFor(pIdx);
 }
 
+function ownerActives(pIdx) { return pIdx === 0 ? [0, 2] : [1, 3]; }
+function ownerBenchRange(pIdx) { return pIdx === 0 ? [0, 1, 2, 3] : [4, 5, 6, 7]; }
+function parseHpText(hpText) {
+  const m = String(hpText || '').match(/(\d+)\s*\/\s*(\d+)/);
+  return m ? { cur: parseInt(m[1], 10), max: parseInt(m[2], 10) } : null;
+}
+function getAvailableActives(pIdx, requireDamaged = false) {
+  return ownerActives(pIdx).filter((aIdx) => {
+    const img = UI.activePokemon[aIdx];
+    if (!img || img.classList.contains('hidden')) return false;
+    if (!requireDamaged) return true;
+    const hp = parseHpText(getHpElForActiveIndex(aIdx)?.textContent || '');
+    return !!hp && hp.cur < hp.max;
+  });
+}
+function chooseActiveIndex(pIdx, opts = {}) {
+  const list = getAvailableActives(pIdx, !!opts.requireDamaged);
+  if (!list.length) return null;
+  if (list.length === 1) return list[0];
+  const labels = list.map(i => {
+    const id = getCardIdFromImg(UI.activePokemon[i]);
+    return `${i}: ${baseSet[id - 1]?.name || `#${id}`}`;
+  }).join('\n');
+  const pick = prompt(`${opts.message || 'Choose Active index:'}\n${labels}`);
+  const idx = Number.parseInt(pick, 10);
+  return list.includes(idx) ? idx : null;
+}
+function chooseBenchIndex(pIdx, msg = 'Choose Benched index:') {
+  const list = ownerBenchRange(pIdx).filter(i => !UI.benchPokemon[i].classList.contains('hidden'));
+  if (!list.length) return null;
+  if (list.length === 1) return list[0];
+  const labels = list.map(i => {
+    const id = getCardIdFromImg(UI.benchPokemon[i]);
+    return `${i}: ${baseSet[id - 1]?.name || `#${id}`}`;
+  }).join('\n');
+  const pick = prompt(`${msg}\n${labels}`);
+  const idx = Number.parseInt(pick, 10);
+  return list.includes(idx) ? idx : null;
+}
+function discardOneEnergyFromActive(activeIdx, count = 1) {
+  let toRemove = count;
+  for (let i = 0; i < attachedEnergy[activeIdx].length && toRemove > 0; i++) {
+    const used = Math.min(attachedEnergy[activeIdx][i], toRemove);
+    attachedEnergy[activeIdx][i] -= used;
+    toRemove -= used;
+  }
+  redrawEnergyForActiveIndex(activeIdx);
+  return count - toRemove;
+}
+
+function canPlayTrainerCard(cardId, pIdx) {
+  const opp = 1 - pIdx;
+  switch (cardId) {
+    case 79:
+      return getAvailableActives(pIdx).some(i => attachedEnergy[i].reduce((a, b) => a + b, 0) > 0) &&
+        getAvailableActives(opp).some(i => attachedEnergy[i].reduce((a, b) => a + b, 0) > 0);
+    case 80: case 82: return getAvailableActives(pIdx).length > 0;
+    case 84: case 88: case 91: return true;
+    case 89:
+      return ownerBenchRange(pIdx).some(i => UI.benchPokemon[i].classList.contains('hidden')) &&
+        discardPiles[playerKeyOf(pIdx)].some(id => baseBasic.includes(id));
+    case 90:
+      return getAvailableActives(pIdx, true).some(i => attachedEnergy[i].reduce((a, b) => a + b, 0) > 0);
+    case 92:
+      return getAvailableActives(opp).some(i => attachedEnergy[i].reduce((a, b) => a + b, 0) > 0);
+    case 93:
+      return getAvailableActives(opp).length > 0 && ownerBenchRange(opp).some(i => !UI.benchPokemon[i].classList.contains('hidden'));
+    case 94:
+      return getAvailableActives(pIdx, true).length > 0;
+    case 95:
+      return getAvailableActives(pIdx).length > 0 && ownerBenchRange(pIdx).some(i => !UI.benchPokemon[i].classList.contains('hidden'));
+    default:
+      return false;
+  }
+}
+
+function resolveTrainerCard(cardId, pIdx) {
+  if (!canPlayTrainerCard(cardId, pIdx)) return false;
+  const opp = 1 - pIdx;
+  switch (cardId) {
+    case 79: {
+      const own = chooseActiveIndex(pIdx, { message: 'Choose your Active to discard 1 Energy from:' });
+      const foe = chooseActiveIndex(opp, { message: 'Choose opponent Active to remove up to 2 Energy from:' });
+      if (own == null || foe == null) return false;
+      if (discardOneEnergyFromActive(own, 1) < 1) return false;
+      discardOneEnergyFromActive(foe, 2);
+      return true;
+    }
+    case 80: {
+      const own = chooseActiveIndex(pIdx, { message: 'Choose your Active for Defender:' });
+      if (own == null) return false;
+      window.Game?.Attack?.applyDefenderShield?.(own);
+      return true;
+    }
+    case 82: {
+      const own = chooseActiveIndex(pIdx, { message: 'Choose your Active for Full Heal:' });
+      if (own == null) return false;
+      window.Game?.Attack?.clearStatus?.(own);
+      return true;
+    }
+    case 84:
+      window.Game?.Attack?.addPlusPowerForOwner?.(pIdx, 1);
+      return true;
+    case 88: {
+      const hand = getHandArr(pIdx);
+      while (hand.length) addToDiscard(pIdx, hand.pop());
+      renderHandFor(pIdx);
+      for (let i = 0; i < 7; i++) drawCard();
+      return true;
+    }
+    case 89: {
+      const discard = discardPiles[playerKeyOf(pIdx)];
+      const candidates = discard.filter(id => baseBasic.includes(id));
+      const chosen = candidates.length === 1 ? candidates[0] : Number.parseInt(prompt(`Choose Basic Pokémon id to Revive:\n${[...new Set(candidates)].join(', ')}`), 10);
+      if (!baseBasic.includes(chosen)) return false;
+      const benchIdx = ownerBenchRange(pIdx).find(i => UI.benchPokemon[i].classList.contains('hidden'));
+      const pos = discard.indexOf(chosen);
+      if (benchIdx == null || pos === -1) return false;
+      discard.splice(pos, 1);
+      renderDiscardFor(pIdx);
+      UI.benchPokemon[benchIdx].src = cardIdToSrc(chosen);
+      UI.benchPokemon[benchIdx].classList.remove('hidden');
+      const max = baseSet[chosen - 1]?.HP | 0;
+      const cur = Math.ceil(max / 2);
+      UI.hitpoints[playerKeyOf(pIdx)][(benchIdx % 4) + 2].textContent = `HP: ${cur} / ${max}`;
+      return true;
+    }
+    case 90: {
+      const own = chooseActiveIndex(pIdx, { message: 'Choose damaged Active for Super Potion:', requireDamaged: true });
+      if (own == null || discardOneEnergyFromActive(own, 1) < 1) return false;
+      const hpEl = getHpElForActiveIndex(own);
+      const hp = parseHpText(hpEl?.textContent || '');
+      if (!hp) return false;
+      hpEl.textContent = `${Math.min(hp.max, hp.cur + 40)} / ${hp.max}`;
+      return true;
+    }
+    case 91:
+      drawCard(); drawCard();
+      return true;
+    case 92: {
+      const foe = chooseActiveIndex(opp, { message: 'Choose opponent Active to remove 1 Energy from:' });
+      return foe != null && discardOneEnergyFromActive(foe, 1) > 0;
+    }
+    case 93: {
+      const foeActive = chooseActiveIndex(opp, { message: 'Choose opponent Active to switch out:' });
+      const foeBench = chooseBenchIndex(opp, 'Choose opponent Bench to switch in:');
+      if (foeActive == null || foeBench == null) return false;
+      const beforeRetreat = hasRetreatedThisTurn;
+      window.Game?.Energy?.swapActiveWithBench?.(foeActive, foeBench);
+      hasRetreatedThisTurn = beforeRetreat;
+      refreshRetreatButtons();
+      return true;
+    }
+    case 94: {
+      const own = chooseActiveIndex(pIdx, { message: 'Choose damaged Active to heal 20:', requireDamaged: true });
+      if (own == null) return false;
+      const hpEl = getHpElForActiveIndex(own);
+      const hp = parseHpText(hpEl?.textContent || '');
+      if (!hp) return false;
+      hpEl.textContent = `${Math.min(hp.max, hp.cur + 20)} / ${hp.max}`;
+      return true;
+    }
+    case 95: {
+      const ownActive = chooseActiveIndex(pIdx, { message: 'Choose your Active to switch out:' });
+      const ownBench = chooseBenchIndex(pIdx, 'Choose your Bench to switch in:');
+      if (ownActive == null || ownBench == null) return false;
+      const beforeRetreat = hasRetreatedThisTurn;
+      window.Game?.Energy?.swapActiveWithBench?.(ownActive, ownBench);
+      hasRetreatedThisTurn = beforeRetreat;
+      refreshRetreatButtons();
+      return true;
+    }
+    default:
+      alert('That Base Set Trainer is not implemented yet.');
+      return false;
+  }
+}
+
 function getHandArr(pIdx) { return pIdx === 0 ? player1Hand : player2Hand; }
 
 function bindHandCardEvents(imgEl) {
@@ -658,6 +838,16 @@ function bindHandCardEvents(imgEl) {
 
     const id = getCardIdFromImg(imgEl);
     if (typeof baseTrainers !== 'undefined' && baseTrainers.includes(id)) {
+      if (trainerPlayedThisTurn) {
+        alert('Base Set rule: only 1 Trainer card may be played each turn.');
+        cardSelected = false;
+        return;
+      }
+      if (!canPlayTrainerCard(id, activePlayer)) {
+        alert('You cannot legally play this Trainer right now.');
+        cardSelected = false;
+        return;
+      }
       if (activePlayer === 0 && round > 1) openTrainer(UI.trainerMenu[0], UI.handBtn[0]);
       else if (activePlayer === 1 && round > 2) openTrainer(UI.trainerMenu[1], UI.handBtn[1]);
       else cardSelected = false;
@@ -955,6 +1145,7 @@ const init = function () {
   cardSelected = false;
   energySelected = false;
   cardChange = false;
+  trainerPlayedThisTurn = false;
   prizesRemaining.player1 = MAX_PRIZES;
   prizesRemaining.player2 = MAX_PRIZES;
   const { p1, p2 } = window.randomTypesForTwoPlayers();
@@ -1218,8 +1409,11 @@ for (let i = 0; i < 4; i++) {
       id = m ? parseInt(m[1], 10) : null;
     }
 
-    if (id) {
+    if (id && resolveTrainerCard(id, activePlayer)) {
       addToDiscard(activePlayer, id);   // push into the active player's discard + re-render grid
+      trainerPlayedThisTurn = true;
+    } else if (id) {
+      alert('Trainer card was not played (requirements were not met).');
     }
 
     // Clear the big trainer card and close the menu

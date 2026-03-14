@@ -11,6 +11,7 @@
   const battleState = {
     statusByActiveIdx: [STATUS.NONE, STATUS.NONE, STATUS.NONE, STATUS.NONE],
     defendShieldByActiveIdx: [false, false, false, false],
+    plusPowerByOwner: [0, 0],
   };
 
   function flipCoin() { return Math.random() < 0.5; }
@@ -38,6 +39,14 @@
     return s === STATUS.ASLEEP || s === STATUS.PARALYZED;
   }
   function clearStatus(activeIdx) { battleState.statusByActiveIdx[activeIdx] = STATUS.NONE; }
+  function addPlusPowerForOwner(ownerIdx, amount = 1) {
+    if (ownerIdx == null || ownerIdx < 0 || ownerIdx > 1) return;
+    battleState.plusPowerByOwner[ownerIdx] += Math.max(0, amount | 0);
+  }
+  function applyDefenderShield(activeIdx) {
+    if (activeIdx == null || activeIdx < 0 || activeIdx > 3) return;
+    battleState.defendShieldByActiveIdx[activeIdx] = true;
+  }
   function setStatus(activeIdx, status) {
     if (activeIdx == null || activeIdx < 0) return;
     battleState.statusByActiveIdx[activeIdx] = status;
@@ -291,6 +300,7 @@
     }
     if (defenderCard.weakness === attackerCard.type) damage *= 2;
     if (defenderCard.resistance === attackerCard.type) damage = Math.max(0, damage - 30);
+    damage += (battleState.plusPowerByOwner[attackerOwner] || 0) * 10;
 
     const hpEl = U.getHpElForActiveIndex(defenderIdx);
     if (!hpEl) return;
@@ -395,6 +405,8 @@
       battleState.statusByActiveIdx[i] = STATUS.NONE;
       battleState.defendShieldByActiveIdx[i] = false;
     }
+    battleState.plusPowerByOwner[0] = 0;
+    battleState.plusPowerByOwner[1] = 0;
   }
 
   function onTurnStart(activePlayerIdx) {
@@ -408,6 +420,7 @@
     ownerActives(activePlayerIdx).forEach((idx) => {
       if (battleState.statusByActiveIdx[idx] === STATUS.PARALYZED) clearStatus(idx);
     });
+    battleState.plusPowerByOwner[activePlayerIdx] = 0;
   }
 
   // Optional hook for your main script; keep idempotent
@@ -419,6 +432,7 @@
     enterTargetSelect, cancelAttackFlow, finalizeAttackFlow,
     checkEnergyForAttack, resolveAttack,
     onTurnStart, onTurnEnd,
+    clearStatus, addPlusPowerForOwner, applyDefenderShield,
     resetBattleState,
     initUI,
   };
