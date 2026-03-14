@@ -16,6 +16,7 @@
     player1: Array(ENERGY_TYPES).fill(0),
     player2: Array(ENERGY_TYPES).fill(0),
   };
+  const benchAttachedEnergy = Array.from({ length: 8 }, () => Array(ENERGY_TYPES).fill(0));
 
   // ---- Utilities specific to energy badges/slots ----
   function getEnergyBadgesForActiveIndex(activeIdx) {
@@ -60,6 +61,30 @@
       el.classList.add('hidden');
       if (el.tagName === 'IMG') el.src = '';
     });
+  }
+
+  function clearEnergyForBenchIndex(benchIdx) {
+    if (benchIdx < 0 || benchIdx >= benchAttachedEnergy.length) return;
+    benchAttachedEnergy[benchIdx] = Array(ENERGY_TYPES).fill(0);
+  }
+
+  function clearSelectedEnergy() {
+    global.energySelected = false;
+    global.selectedCard = null;
+  }
+
+  function ownerOfBenchIdx(benchIdx) { return benchIdx >= 0 && benchIdx < 4 ? 0 : 1; }
+  function getBenchIdxFromEl(pokemonEl) { return UI.benchPokemon.findIndex(el => el === pokemonEl); }
+  function canAttachToPokemon(pokemonEl) {
+    if (!pokemonEl || pokemonEl.classList.contains('hidden')) return false;
+
+    const activeIdx = U.getActiveIdxFromEl(pokemonEl);
+    if (activeIdx !== -1) return U.ownerOfActiveIdx(activeIdx) === global.activePlayer;
+
+    const benchIdx = getBenchIdxFromEl(pokemonEl);
+    if (benchIdx !== -1) return ownerOfBenchIdx(benchIdx) === global.activePlayer;
+
+    return false;
   }
 
   // ---- Attach flow ----
@@ -143,14 +168,27 @@
 
   function attachEnergy(pokemon) {
     if (!global.energySelected) return;
+    if (!canAttachToPokemon(pokemon)) return;
+
     const activeIdx = U.getActiveIdxFromEl(pokemon);
+    const benchIdx  = getBenchIdxFromEl(pokemon);
     const typeIdx   = getSelectedEnergyTypeIdx();
+
+    if (typeIdx === -1) return;
+
     if (activeIdx !== -1 && typeIdx !== -1) {
       decreaseEnergy();
       displayEnergy(pokemon);
       attachedEnergy[activeIdx][typeIdx]++;
-      global.energySelected = false;
+      clearSelectedEnergy();
       refreshRetreatButtons();
+      return;
+    }
+
+    if (benchIdx !== -1) {
+      decreaseEnergy();
+      benchAttachedEnergy[benchIdx][typeIdx]++;
+      clearSelectedEnergy();
     }
   }
 
@@ -268,8 +306,11 @@
       }
     }
 
-    // Clear the old active's energy (bench energy not tracked visually)
-    clearEnergyForActiveIndex(activeIdx);
+    // Swap energy ownership as Pokémon switch between active and bench.
+    const prevActiveEnergy = [...attachedEnergy[activeIdx]];
+    attachedEnergy[activeIdx] = [...benchAttachedEnergy[benchGlobalIdx]];
+    benchAttachedEnergy[benchGlobalIdx] = prevActiveEnergy;
+    redrawEnergyForActiveIndex(activeIdx);
 
     global.hasRetreatedThisTurn = true;
     refreshRetreatButtons();
@@ -327,18 +368,29 @@
     });
   }
 
+  function moveBenchEnergyToActive(activeIdx, benchIdx) {
+    if (activeIdx < 0 || activeIdx >= attachedEnergy.length) return;
+    if (benchIdx < 0 || benchIdx >= benchAttachedEnergy.length) return;
+
+    attachedEnergy[activeIdx] = [...benchAttachedEnergy[benchIdx]];
+    benchAttachedEnergy[benchIdx] = Array(ENERGY_TYPES).fill(0);
+    redrawEnergyForActiveIndex(activeIdx);
+    refreshRetreatButtons();
+  }
+
   // Optional hook for your main script; keep idempotent
   function initUI(){ /* no-op on purpose */ }
 
   // ---------- Exports ----------
   const Energy = {
-    attachedEnergy, energyCounts,
+    attachedEnergy, benchAttachedEnergy, energyCounts,
     addEnergy, useEnergy, attachEnergy,
     getSelectedEnergyTypeIdx, decreaseEnergy,
     getEnergyBadgesForActiveIndex, getEnergySlotsForActiveIndex,
     clearEnergyForActiveIndex, elevateEnergyForIndex, redrawEnergyForActiveIndex,
     totalEnergyOnActive, canRetreatFrom, payRetreatCost,
     beginRetreatSelection, refreshRetreatButtons, swapActiveWithBench,
+    clearEnergyForBenchIndex, moveBenchEnergyToActive, clearSelectedEnergy,
     initUI,
   };
 
@@ -347,6 +399,7 @@
 
   // Back-compat globals your existing script references
   global.attachedEnergy = attachedEnergy;
+  global.benchAttachedEnergy = benchAttachedEnergy;
   global.energyCounts = energyCounts;
   global.addEnergy = addEnergy;
   global.useEnergy = useEnergy;

@@ -190,7 +190,10 @@ function openEnergy(energy, handBtn) {
 
   // Hide while opening; recompute when closing
   if (opening) UI.endBtn.classList.add('hidden');
-  else recomputeEndTurnVisibility();
+  else {
+    Game?.Energy?.clearSelectedEnergy?.();
+    recomputeEndTurnVisibility();
+  }
 
   updateMenuOpenState();
 }
@@ -1332,12 +1335,18 @@ UI.energyBtn.addEventListener('click', function () {
 for (let i = 0; i < 4; i++) {
   UI.benchSlots.player1[i].addEventListener('click', function () {
     cardChange = cardPlacement(UI.benchPokemon[i]);
-    changeHealth(UI.hitpoints.player1[i + 2], false, UI.benchPokemon[i]);
+    if (cardChange) {
+      changeHealth(UI.hitpoints.player1[i + 2], false, UI.benchPokemon[i]);
+      Game?.Energy?.clearEnergyForBenchIndex?.(i);
+    }
     refreshRetreatButtons();
   });
   UI.benchSlots.player2[i].addEventListener('click', function () {
     cardChange = cardPlacement(UI.benchPokemon[i + 4]);
-    changeHealth(UI.hitpoints.player2[i + 2], false, UI.benchPokemon[i + 4]);
+    if (cardChange) {
+      changeHealth(UI.hitpoints.player2[i + 2], false, UI.benchPokemon[i + 4]);
+      Game?.Energy?.clearEnergyForBenchIndex?.(i + 4);
+    }
     refreshRetreatButtons();
   });
 }
@@ -1368,6 +1377,7 @@ for (let i = 0; i < 4; i++) {
         to.src = UI.benchPokemon[i].src;
         to.classList.remove('hidden');
         changeHealth(getHpElForActiveIndex(targetActive), true, to);
+        Game?.Energy?.moveBenchEnergyToActive?.(targetActive, i);
         UI.benchPokemon[i].classList.add('hidden');
         UI.benchPokemon[i].src = '';
         recomputeEndTurnVisibility();
@@ -1376,6 +1386,7 @@ for (let i = 0; i < 4; i++) {
     }
     // otherwise, allow evolution
     cardEvolution(UI.benchPokemon[i], UI.hitpoints.player1[i + 2], false);
+    attachEnergy(UI.benchPokemon[i]);
   });
 
   // player2 bench
@@ -1388,6 +1399,7 @@ for (let i = 0; i < 4; i++) {
         to.src = UI.benchPokemon[i + 4].src;
         to.classList.remove('hidden');
         changeHealth(getHpElForActiveIndex(targetActive), true, to);
+        Game?.Energy?.moveBenchEnergyToActive?.(targetActive, i + 4);
         UI.benchPokemon[i + 4].classList.add('hidden');
         UI.benchPokemon[i + 4].src = '';
         recomputeEndTurnVisibility();
@@ -1395,6 +1407,7 @@ for (let i = 0; i < 4; i++) {
       }
     }
     cardEvolution(UI.benchPokemon[i + 4], UI.hitpoints.player2[i + 2], false);
+    attachEnergy(UI.benchPokemon[i + 4]);
   });
 }
 
