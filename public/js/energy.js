@@ -75,14 +75,21 @@
 
   function ownerOfBenchIdx(benchIdx) { return benchIdx >= 0 && benchIdx < 4 ? 0 : 1; }
   function getBenchIdxFromEl(pokemonEl) { return UI.benchPokemon.findIndex(el => el === pokemonEl); }
+  function currentPlayerIdx() {
+    if (U.whoIsActive) return U.whoIsActive();
+    if (Number.isInteger(global.activePlayer)) return global.activePlayer;
+    return UI.players[0].classList.contains('player--active') ? 0 : 1;
+  }
   function canAttachToPokemon(pokemonEl) {
     if (!pokemonEl || pokemonEl.classList.contains('hidden')) return false;
 
+    const activePlayerIdx = currentPlayerIdx();
+
     const activeIdx = U.getActiveIdxFromEl(pokemonEl);
-    if (activeIdx !== -1) return U.ownerOfActiveIdx(activeIdx) === global.activePlayer;
+    if (activeIdx !== -1) return U.ownerOfActiveIdx(activeIdx) === activePlayerIdx;
 
     const benchIdx = getBenchIdxFromEl(pokemonEl);
-    if (benchIdx !== -1) return ownerOfBenchIdx(benchIdx) === global.activePlayer;
+    if (benchIdx !== -1) return ownerOfBenchIdx(benchIdx) === activePlayerIdx;
 
     return false;
   }
@@ -316,7 +323,7 @@
     refreshRetreatButtons();
 
     // After swap, refresh the attack list if the panel is open
-    const yourActives = global.activePlayer === 0 ? [0,2] : [1,3];
+    const yourActives = currentPlayerIdx() === 0 ? [0,2] : [1,3];
     global.Game?.Attack?.renderAttackOptions?.(yourActives);
     const title = document.getElementById('attack-panel-title');
     if (title) title.textContent = 'Choose an attack';
