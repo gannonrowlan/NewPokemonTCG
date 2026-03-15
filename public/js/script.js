@@ -38,6 +38,11 @@ let activePlayer,
   discardPiles = { player1: [], player2: [] },
   prizePools = { player1: [], player2: [] };
 
+Object.defineProperty(window, 'hasRetreatedThisTurn', {
+  get: () => hasRetreatedThisTurn,
+  set: (value) => { hasRetreatedThisTurn = Boolean(value); },
+  configurable: true,
+});
 // --- Core Game Functions ---
 
 // Always use the "swap" logic for hand and energy menus!
