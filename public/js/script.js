@@ -314,10 +314,14 @@ function clearTrainerSelection(p) {
 }
 
 function returnTrainerCardToHand(p) {
-  const id = getPendingTrainerId(p);
+  // Only return a card that was actually moved into the trainer slot.
+  // If the player hit Cancel before placing, the hand still owns that card.
+  if (UI.trainerCard[p].classList.contains('hidden')) return;
+
+  const id = getCardIdFromImg(UI.trainerCard[p]);
   if (id) {
-    putCardIntoHand(activePlayer, id);
-    sortHand(activePlayer);
+    putCardIntoHand(p, id);
+    sortHand(p);
   }
 }
 const openHand = function (hand) {
