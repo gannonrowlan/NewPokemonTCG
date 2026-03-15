@@ -724,6 +724,40 @@ function discardOneEnergyFromActive(activeIdx, count = 1, reason = 'Choose Energ
   return window.Game?.Energy?.discardEnergyFromActive?.(activeIdx, count, { reason, redraw: true }) || 0;
 }
 
+function formatCardName(cardId) {
+  return baseSet[cardId - 1]?.name || `#${cardId}`;
+}
+
+function chooseCardIdFromList(cardIds, promptTitle) {
+  const unique = [...new Set(cardIds)];
+  if (!unique.length) return null;
+  if (unique.length === 1) return unique[0];
+  const labels = unique
+    .map(id => `${id}: ${formatCardName(id)}`)
+    .join('\n');
+  const picked = Number.parseInt(prompt(`${promptTitle}\n${labels}`), 10);
+  return unique.includes(picked) ? picked : null;
+}
+
+function chooseDeckOrder(topCards, promptTitle) {
+  if (topCards.length <= 1) return topCards;
+  const labels = topCards
+    .map((id, idx) => `${idx + 1}. ${formatCardName(id)} (#${id})`)
+    .join('\n');
+  const raw = prompt(`${promptTitle}\n${labels}\n\nEnter new top-to-bottom order using positions (example: 3,1,2,4,5):`);
+  if (raw == null || raw.trim() === '') return topCards;
+
+  const picks = raw.split(',').map(s => Number.parseInt(s.trim(), 10));
+  const isValid = picks.length === topCards.length &&
+    picks.every(n => Number.isInteger(n) && n >= 1 && n <= topCards.length) &&
+    (new Set(picks)).size === topCards.length;
+  if (!isValid) {
+    alert('Invalid order entered. Keeping original top-deck order.');
+    return topCards;
+  }
+  return picks.map(pos => topCards[pos - 1]);
+}
+
 function canPlayTrainerCard(cardId, pIdx) {
   const opp = 1 - pIdx;
   switch (cardId) {
@@ -732,6 +766,11 @@ function canPlayTrainerCard(cardId, pIdx) {
         getAvailableActives(opp).some(i => attachedEnergy[i].reduce((a, b) => a + b, 0) > 0);
     case 80: case 82: return getAvailableActives(pIdx).length > 0;
     case 84: case 88: case 91: return true;
+    case 86:
+      return ownerBenchRange(opp).some(i => UI.benchPokemon[i].classList.contains('hidden')) &&
+        discardPiles[playerKeyOf(opp)].some(id => baseBasic.includes(id));
+    case 87:
+      return (pIdx === 0 ? player1Deck.length : player2Deck.length) > 0;
     case 89:
       return ownerBenchRange(pIdx).some(i => UI.benchPokemon[i].classList.contains('hidden')) &&
         discardPiles[playerKeyOf(pIdx)].some(id => baseBasic.includes(id));
@@ -777,6 +816,33 @@ function resolveTrainerCard(cardId, pIdx) {
     case 84:
       window.Game?.Attack?.addPlusPowerForOwner?.(pIdx, 1);
       return true;
+    case 86: {
+      const oppDiscard = discardPiles[playerKeyOf(opp)];
+      const candidates = oppDiscard.filter(id => baseBasic.includes(id));
+      const chosen = chooseCardIdFromList(candidates, 'Choose a Basic Pokémon from opponent discard for Pokémon Flute:');
+      if (!baseBasic.includes(chosen)) return false;
+
+      const benchIdx = ownerBenchRange(opp).find(i => UI.benchPokemon[i].classList.contains('hidden'));
+      const pos = oppDiscard.indexOf(chosen);
+      if (benchIdx == null || pos === -1) return false;
+
+      oppDiscard.splice(pos, 1);
+      renderDiscardFor(opp);
+      UI.benchPokemon[benchIdx].src = cardIdToSrc(chosen);
+      UI.benchPokemon[benchIdx].classList.remove('hidden');
+      const max = baseSet[chosen - 1]?.HP | 0;
+      UI.hitpoints[playerKeyOf(opp)][(benchIdx % 4) + 2].textContent = `HP: ${max} / ${max}`;
+      return true;
+    }
+    case 87: {
+      const deck = pIdx === 0 ? player1Deck : player2Deck;
+      if (!deck.length) return false;
+      const count = Math.min(5, deck.length);
+      const topCards = deck.slice(0, count);
+      const reordered = chooseDeckOrder(topCards, 'Pokédex: Reorder the top cards of your deck');
+      deck.splice(0, count, ...reordered);
+      return true;
+    }
     case 88: {
       const hand = getHandArr(pIdx);
       while (hand.length) addToDiscard(pIdx, hand.pop());
@@ -787,7 +853,7 @@ function resolveTrainerCard(cardId, pIdx) {
     case 89: {
       const discard = discardPiles[playerKeyOf(pIdx)];
       const candidates = discard.filter(id => baseBasic.includes(id));
-      const chosen = candidates.length === 1 ? candidates[0] : Number.parseInt(prompt(`Choose Basic Pokémon id to Revive:\n${[...new Set(candidates)].join(', ')}`), 10);
+      const chosen = chooseCardIdFromList(candidates, 'Choose Basic Pokémon to Revive:');
       if (!baseBasic.includes(chosen)) return false;
       const benchIdx = ownerBenchRange(pIdx).find(i => UI.benchPokemon[i].classList.contains('hidden'));
       const pos = discard.indexOf(chosen);
