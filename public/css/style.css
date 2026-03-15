@@ -760,7 +760,8 @@ main.board-inert .btn--hand2 {
   right: 0.75rem;
   bottom: 2rem;
   overflow-y: auto;
-
+  padding: 2rem;
+  box-sizing: border-box;
   display: grid;
 
   /* EXACTLY four cards across at your current thumbnail size */

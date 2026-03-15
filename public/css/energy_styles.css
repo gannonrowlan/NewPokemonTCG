@@ -29,6 +29,10 @@
 .energy-card:hover {
   transform: translateY(-2px);
 }
+.energy-card.is-selected-card,
+.energy-card.is-selected-card:hover {
+  transform: translateY(-2px);
+}
 .energy-badge-active {
   position: absolute;
   width: 24px;
