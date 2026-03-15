@@ -736,6 +736,58 @@ function chooseBenchIndex(pIdx, msg = 'Choose Benched index:') {
   const idx = Number.parseInt(pick, 10);
   return list.includes(idx) ? idx : null;
 }
+
+function getOwnedPokemonIndices(pIdx) {
+  return [...ownerActives(pIdx), ...ownerBenchRange(pIdx)].filter((idx) => {
+    if (idx <= 3) return !UI.activePokemon[idx].classList.contains('hidden');
+    return !UI.benchPokemon[idx].classList.contains('hidden');
+  });
+}
+
+function getPokemonImageByIndex(idx) {
+  return idx <= 3 ? UI.activePokemon[idx] : UI.benchPokemon[idx];
+}
+
+function getHpElForBoardIndex(pIdx, idx) {
+  if (idx <= 3) return getHpElForActiveIndex(idx);
+  return UI.hitpoints[playerKeyOf(pIdx)][(idx % 4) + 2];
+}
+
+function chooseOwnedPokemonIndex(pIdx, opts = {}) {
+  const list = getOwnedPokemonIndices(pIdx).filter((idx) => {
+    const id = getCardIdFromImg(getPokemonImageByIndex(idx));
+    if (!id) return false;
+    if (opts.requireEvolved && !getEvolvesFromId(baseSet[id - 1])) return false;
+    if (opts.requireBasic && !baseBasic.includes(id)) return false;
+    return true;
+  });
+  if (!list.length) return null;
+  if (list.length === 1) return list[0];
+  const labels = list.map((idx) => {
+    const id = getCardIdFromImg(getPokemonImageByIndex(idx));
+    return `${idx}: ${formatCardName(id)} (#${id})`;
+  }).join('\n');
+  const pick = Number.parseInt(prompt(`${opts.message || 'Choose one of your Pokémon:'}\n${labels}`), 10);
+  return list.includes(pick) ? pick : null;
+}
+
+function clearPokemonAtBoardIndex(pIdx, idx) {
+  const img = getPokemonImageByIndex(idx);
+  if (!img) return;
+  img.classList.add('hidden');
+  img.src = '';
+  delete img.dataset.playRound;
+  delete img.dataset.lastEvolved;
+  const hpEl = getHpElForBoardIndex(pIdx, idx);
+  if (hpEl) hpEl.textContent = idx <= 3 ? '- / -' : 'HP: - / -';
+  if (idx <= 3) {
+    window.Game?.Energy?.clearEnergyForActiveIndex?.(idx);
+    window.Game?.Attack?.clearStatus?.(idx);
+  } else {
+    window.Game?.Energy?.clearEnergyForBenchIndex?.(idx);
+  }
+}
+
 function discardOneEnergyFromActive(activeIdx, count = 1, reason = 'Choose Energy type to discard') {
   return window.Game?.Energy?.discardEnergyFromActive?.(activeIdx, count, { reason, redraw: true }) || 0;
 }
@@ -806,6 +858,38 @@ function chooseDeckOrder(topCards, promptTitle) {
 function canPlayTrainerCard(cardId, pIdx) {
   const opp = 1 - pIdx;
   switch (cardId) {
+    case 70:
+      return ownerBenchRange(pIdx).some(i => UI.benchPokemon[i].classList.contains('hidden'));
+    case 71:
+      return getHandArr(pIdx).length >= 3 && (pIdx === 0 ? player1Deck.length : player2Deck.length) > 0;
+    case 72:
+      return getOwnedPokemonIndices(pIdx).some((idx) => {
+        const id = getCardIdFromImg(getPokemonImageByIndex(idx));
+        return !!getEvolvesFromId(baseSet[id - 1]);
+      });
+    case 73:
+      return getHandArr(opp).length > 0;
+    case 74:
+      return getHandArr(pIdx).length >= 3 && discardPiles[playerKeyOf(pIdx)].some(id => id >= 70 && id <= 95);
+    case 75:
+      return getHandArr(pIdx).some(id => id >= 70 && id <= 95) || getHandArr(opp).some(id => id >= 70 && id <= 95);
+    case 76: {
+      const hand = getHandArr(pIdx);
+      const hasStage2 = hand.some((id) => {
+        const card = baseSet[id - 1];
+        const from1 = getEvolvesFromId(card);
+        return !!(from1 && getEvolvesFromId(baseSet[from1 - 1]));
+      });
+      if (!hasStage2) return false;
+      return getOwnedPokemonIndices(pIdx).some((idx) => {
+        const id = getCardIdFromImg(getPokemonImageByIndex(idx));
+        return baseBasic.includes(id);
+      });
+    }
+    case 77:
+      return getHandArr(pIdx).some(id => id >= 1 && id <= 69) && (pIdx === 0 ? player1Deck : player2Deck).some(id => id >= 1 && id <= 69);
+    case 78:
+      return getOwnedPokemonIndices(pIdx).length > 0;
     case 79:
       return getAvailableActives(pIdx).some(i => attachedEnergy[i].reduce((a, b) => a + b, 0) > 0) &&
         getAvailableActives(opp).some(i => attachedEnergy[i].reduce((a, b) => a + b, 0) > 0);
@@ -850,6 +934,184 @@ function resolveTrainerCard(cardId, pIdx) {
   if (!canPlayTrainerCard(cardId, pIdx)) return false;
   const opp = 1 - pIdx;
   switch (cardId) {
+    case 70: {
+      const benchIdx = ownerBenchRange(pIdx).find(i => UI.benchPokemon[i].classList.contains('hidden'));
+      if (benchIdx == null) return false;
+      UI.benchPokemon[benchIdx].src = cardIdToSrc(70);
+      UI.benchPokemon[benchIdx].classList.remove('hidden');
+      UI.benchPokemon[benchIdx].dataset.playRound = String(round);
+      UI.hitpoints[playerKeyOf(pIdx)][(benchIdx % 4) + 2].textContent = 'HP: 10 / 10';
+      return true;
+    }
+    case 71: {
+      const handIndexes = chooseTwoCardIndicesFromHand(pIdx, 'Computer Search: Choose 2 cards from your hand to discard');
+      if (!handIndexes) return false;
+      const hand = getHandArr(pIdx);
+      const [a, b] = handIndexes;
+      const first = hand.splice(a, 1)[0];
+      const second = hand.splice(b, 1)[0];
+      if (first == null || second == null) return false;
+      addToDiscard(pIdx, first);
+      addToDiscard(pIdx, second);
+      renderHandFor(pIdx);
+      const deck = pIdx === 0 ? player1Deck : player2Deck;
+      const chosen = chooseCardIdFromList(deck, 'Computer Search: Choose any card from your deck');
+      if (chosen == null) return false;
+      const pos = deck.indexOf(chosen);
+      if (pos === -1) return false;
+      deck.splice(pos, 1);
+      hand.push(chosen);
+      renderHandFor(pIdx);
+      return true;
+    }
+    case 72: {
+      const idx = chooseOwnedPokemonIndex(pIdx, { message: 'Choose one of your evolved Pokémon to devolve:', requireEvolved: true });
+      if (idx == null) return false;
+      const img = getPokemonImageByIndex(idx);
+      const id = getCardIdFromImg(img);
+      const devolveTo = getEvolvesFromId(baseSet[id - 1]);
+      if (!devolveTo) return false;
+      img.src = cardIdToSrc(devolveTo);
+      getHandArr(pIdx).push(id);
+      renderHandFor(pIdx);
+      const hpEl = getHpElForBoardIndex(pIdx, idx);
+      const hp = parseHpText(hpEl?.textContent || '');
+      if (hp && hp.max > 0) {
+        const damage = Math.max(0, hp.max - hp.cur);
+        const newMax = baseSet[devolveTo - 1]?.HP | 0;
+        const newCur = Math.max(0, newMax - damage);
+        hpEl.textContent = idx <= 3 ? `${newCur} / ${newMax}` : `HP: ${newCur} / ${newMax}`;
+        if (newCur <= 0) {
+          addToDiscard(pIdx, devolveTo);
+          clearPokemonAtBoardIndex(pIdx, idx);
+          if (idx <= 3) {
+            if (checkNoActiveLoss(pIdx)) return true;
+            checkNoPokemonLoss(pIdx);
+          }
+        }
+      }
+      return true;
+    }
+    case 73: {
+      const oppHand = getHandArr(opp);
+      const deck = opp === 0 ? player1Deck : player2Deck;
+      while (oppHand.length) deck.push(oppHand.pop());
+      for (let i = deck.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [deck[i], deck[j]] = [deck[j], deck[i]];
+      }
+      renderHandFor(opp);
+      for (let i = 0; i < 7 && deck.length; i++) getHandArr(opp).push(deck.shift());
+      renderHandFor(opp);
+      return true;
+    }
+    case 74: {
+      const handIndexes = chooseTwoCardIndicesFromHand(pIdx, 'Item Finder: Choose 2 cards from your hand to discard');
+      if (!handIndexes) return false;
+      const hand = getHandArr(pIdx);
+      const [a, b] = handIndexes;
+      const first = hand.splice(a, 1)[0];
+      const second = hand.splice(b, 1)[0];
+      if (first == null || second == null) return false;
+      addToDiscard(pIdx, first);
+      addToDiscard(pIdx, second);
+      renderHandFor(pIdx);
+      const discard = discardPiles[playerKeyOf(pIdx)];
+      const trainers = discard.filter(id => id >= 70 && id <= 95);
+      const chosen = chooseCardIdFromList(trainers, 'Item Finder: Choose a Trainer from your discard to put into your hand');
+      if (chosen == null) return false;
+      const pos = discard.indexOf(chosen);
+      if (pos === -1) return false;
+      discard.splice(pos, 1);
+      hand.push(chosen);
+      renderDiscardFor(pIdx);
+      renderHandFor(pIdx);
+      return true;
+    }
+    case 75: {
+      [pIdx, opp].forEach((owner) => {
+        const hand = getHandArr(owner);
+        const deck = owner === 0 ? player1Deck : player2Deck;
+        for (let i = hand.length - 1; i >= 0; i--) {
+          if (hand[i] >= 70 && hand[i] <= 95) deck.push(hand.splice(i, 1)[0]);
+        }
+        for (let i = deck.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [deck[i], deck[j]] = [deck[j], deck[i]];
+        }
+        renderHandFor(owner);
+      });
+      return true;
+    }
+    case 76: {
+      const hand = getHandArr(pIdx);
+      const stage2s = hand.filter((id) => {
+        const stage1 = getEvolvesFromId(baseSet[id - 1]);
+        return !!(stage1 && getEvolvesFromId(baseSet[stage1 - 1]));
+      });
+      const stage2Id = chooseCardIdFromList(stage2s, 'Pokémon Breeder: Choose a Stage 2 Pokémon from your hand');
+      if (stage2Id == null) return false;
+      const stage1Id = getEvolvesFromId(baseSet[stage2Id - 1]);
+      const basicId = getEvolvesFromId(baseSet[stage1Id - 1]);
+      const idx = chooseOwnedPokemonIndex(pIdx, { message: 'Pokémon Breeder: Choose matching Basic Pokémon in play', requireBasic: true });
+      if (idx == null) return false;
+      const img = getPokemonImageByIndex(idx);
+      const curId = getCardIdFromImg(img);
+      if (curId !== basicId) return false;
+      const hpEl = getHpElForBoardIndex(pIdx, idx);
+      const hp = parseHpText(hpEl?.textContent || '');
+      img.src = cardIdToSrc(stage2Id);
+      img.dataset.lastEvolved = String(round);
+      const handPos = hand.indexOf(stage2Id);
+      if (handPos === -1) return false;
+      hand.splice(handPos, 1);
+      renderHandFor(pIdx);
+      if (hp) {
+        const damage = Math.max(0, hp.max - hp.cur);
+        const newMax = baseSet[stage2Id - 1]?.HP | 0;
+        const newCur = Math.max(0, newMax - damage);
+        hpEl.textContent = idx <= 3 ? `${newCur} / ${newMax}` : `HP: ${newCur} / ${newMax}`;
+      }
+      return true;
+    }
+    case 77: {
+      const hand = getHandArr(pIdx);
+      const pokemonInHand = hand.filter(id => id >= 1 && id <= 69);
+      const giveId = chooseCardIdFromList(pokemonInHand, 'Pokémon Trader: Choose a Pokémon from your hand to shuffle into deck');
+      if (giveId == null) return false;
+      const deck = pIdx === 0 ? player1Deck : player2Deck;
+      const pokemonInDeck = deck.filter(id => id >= 1 && id <= 69);
+      const takeId = chooseCardIdFromList(pokemonInDeck, 'Pokémon Trader: Choose a Pokémon from your deck to put into your hand');
+      if (takeId == null) return false;
+      const handPos = hand.indexOf(giveId);
+      const deckPos = deck.indexOf(takeId);
+      if (handPos === -1 || deckPos === -1) return false;
+      hand.splice(handPos, 1);
+      deck.splice(deckPos, 1);
+      deck.push(giveId);
+      hand.push(takeId);
+      for (let i = deck.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [deck[i], deck[j]] = [deck[j], deck[i]];
+      }
+      renderHandFor(pIdx);
+      return true;
+    }
+    case 78: {
+      const idx = chooseOwnedPokemonIndex(pIdx, { message: 'Scoop Up: Choose one of your Pokémon to return to hand' });
+      if (idx == null) return false;
+      const img = getPokemonImageByIndex(idx);
+      const id = getCardIdFromImg(img);
+      if (!id) return false;
+      getHandArr(pIdx).push(id);
+      renderHandFor(pIdx);
+      clearPokemonAtBoardIndex(pIdx, idx);
+      if (idx <= 3) {
+        if (checkNoActiveLoss(pIdx)) return true;
+        checkNoPokemonLoss(pIdx);
+      }
+      return true;
+    }
     case 79: {
       const own = chooseActiveIndex(pIdx, { message: 'Choose your Active to discard 1 Energy from:', requireEnergy: true });
       const foe = chooseActiveIndex(opp, { message: 'Choose opponent Active to remove up to 2 Energy from:', requireEnergy: true });
