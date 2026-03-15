@@ -43,6 +43,30 @@ Object.defineProperty(window, 'hasRetreatedThisTurn', {
   set: (value) => { hasRetreatedThisTurn = Boolean(value); },
   configurable: true,
 });
+
+function clearSelectionIndicator() {
+  document.querySelectorAll('.is-selected-card').forEach(el => el.classList.remove('is-selected-card'));
+}
+
+function markSelectedCard(el, options = {}) {
+  clearSelectionIndicator();
+  if (!el) {
+    if (options.clearState !== false) {
+      cardSelected = false;
+      selectedCard = null;
+    }
+    return;
+  }
+
+  el.classList.add('is-selected-card');
+  selectedCard = el;
+  cardSelected = options.cardSelected ?? true;
+}
+
+window.Game = window.Game || {};
+window.Game.Selection = window.Game.Selection || {};
+window.Game.Selection.clearSelectionIndicator = clearSelectionIndicator;
+window.Game.Selection.markSelectedCard = markSelectedCard;
 // --- Core Game Functions ---
 
 // Always use the "swap" logic for hand and energy menus!
@@ -86,7 +110,7 @@ function cardPlacement(card) {
     delete card.dataset.lastEvolved;
     consumeSelectedHandCard();
     selectedCard.classList.add('hidden');
-    cardSelected = false;
+    markSelectedCard(null);
     return true;
   }
   return false;
@@ -138,7 +162,7 @@ function cardEvolution(card, healthDiv, active) {
   card.dataset.lastEvolved = String(round);
 
   // Clear hand selection
-  cardSelected = false;
+  markSelectedCard(null);
 }
 
 
@@ -190,7 +214,7 @@ function openEnergy(energy, handBtn) {
   energy.classList.toggle('hidden');
   UI.newBtn.classList.toggle('hidden');
   handBtn.classList.toggle('hidden');
-  cardSelected = false;
+  markSelectedCard(null);
   if (round >= 3) UI.attackBtn.classList.toggle('hidden');
 
   // Hide while opening; recompute when closing
@@ -285,7 +309,7 @@ const closeTrainer = function (trainerMenu, handBtn, confirmBtn) {
   trainerMenu.classList.add('hidden');
   confirmBtn.classList.add('hidden');
   handBtn.classList.remove('hidden');
-  cardSelected = false;
+  markSelectedCard(null);
 
   // Keep New Game consistent with the global menu state
   if (anyMenuOpen()) UI.newBtn.classList.add('hidden');
@@ -314,8 +338,7 @@ function getPendingTrainerId(p) {
 function clearTrainerSelection(p) {
   UI.trainerCard[p].classList.add('hidden');
   UI.trainerCard[p].src = '';
-  selectedCard = null;
-  cardSelected = false;
+  markSelectedCard(null);
 }
 
 function returnTrainerCardToHand(p) {
@@ -342,7 +365,8 @@ const openHand = function (hand) {
   } else {
     recomputeEndTurnVisibility();              // closing → compute properly
   }
-  cardSelected = false;
+  markSelectedCard(null);
+  clearSelectionIndicator();
   updateMenuOpenState();
 };
 
@@ -561,8 +585,7 @@ function enableDragForHand() {
         const id = getCardIdFromImg(img);
         // Only drag Pokémon from hand
         if (!isPokemonId(id)) { e.preventDefault(); return; }
-        selectedCard = img;     // reuse your existing state
-        cardSelected = true;
+        markSelectedCard(img);
         // make it a proper drag payload
         e.dataTransfer.setData('text/plain', String(id));
         e.dataTransfer.effectAllowed = 'move';
@@ -1333,24 +1356,23 @@ function getHandArr(pIdx) { return pIdx === 0 ? player1Hand : player2Hand; }
 function bindHandCardEvents(imgEl) {
   // Click selects (trainers open the trainer UI as before)
   imgEl.addEventListener('click', () => {
-    cardSelected = true;
-    selectedCard = imgEl;
+    markSelectedCard(imgEl);
 
     const id = getCardIdFromImg(imgEl);
     if (typeof baseTrainers !== 'undefined' && baseTrainers.includes(id)) {
       if (trainerPlayedThisTurn) {
         alert('Base Set rule: only 1 Trainer card may be played each turn.');
-        cardSelected = false;
+        markSelectedCard(null);
         return;
       }
       if (!canPlayTrainerCard(id, activePlayer)) {
         alert('You cannot legally play this Trainer right now.');
-        cardSelected = false;
+        markSelectedCard(null);
         return;
       }
       if (activePlayer === 0 && round > 1) openTrainer(UI.trainerMenu[0], UI.handBtn[0]);
       else if (activePlayer === 1 && round > 2) openTrainer(UI.trainerMenu[1], UI.handBtn[1]);
-      else cardSelected = false;
+      else markSelectedCard(null);
     }
   });
 
@@ -1359,8 +1381,7 @@ function bindHandCardEvents(imgEl) {
   imgEl.addEventListener('dragstart', (e) => {
     const id = getCardIdFromImg(imgEl);
     if (!isPokemonId(id)) { e.preventDefault(); return; }
-    selectedCard = imgEl;
-    cardSelected = true;
+    markSelectedCard(imgEl);
     e.dataTransfer.setData('text/plain', String(id));
     e.dataTransfer.effectAllowed = 'move';
     imgEl.classList.add('dragging');
@@ -1642,7 +1663,7 @@ const init = function () {
   playing = true;
   player1Energy = 1;
   player2Energy = 1;
-  cardSelected = false;
+  markSelectedCard(null);
   energySelected = false;
   cardChange = false;
   trainerPlayedThisTurn = false;

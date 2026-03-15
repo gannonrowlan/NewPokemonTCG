@@ -100,6 +100,7 @@
   }
 
   function clearSelectedEnergy() {
+    global.Game?.Selection?.clearSelectionIndicator?.();
     global.energySelected = false;
     global.selectedCard = null;
   }
@@ -131,7 +132,7 @@
   function useEnergy(energyCard, energyCount) {
     if (energyCount > 0) {
       global.energySelected = true;
-      global.selectedCard = energyCard;
+      global.Game?.Selection?.markSelectedCard?.(energyCard, { cardSelected: false });
     }
   }
 

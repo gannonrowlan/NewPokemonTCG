@@ -783,6 +783,12 @@ main.board-inert .btn--hand2 {
   /* remove: justify-self: center; */
 }
 
+.is-selected-card {
+  outline: 6px solid #f6d743;
+  outline-offset: 3px;
+  box-shadow: 0 0 0 4px rgba(16, 16, 145, 0.55), 0 2rem 5rem rgba(0,0,0,0.25);
+  border-radius: 6px;
+}
 
 /* Keep Hand buttons above their overlays */
 .btn--hand1, .btn--hand2 { z-index: 3000; }
