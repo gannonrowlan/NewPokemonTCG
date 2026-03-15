@@ -10,8 +10,8 @@
   global.lastAttackKO = false; // preserved for back-compat with your code
   const battleState = {
     statusByActiveIdx: [STATUS.NONE, STATUS.NONE, STATUS.NONE, STATUS.NONE],
-    defendShieldByActiveIdx: [false, false, false, false],
-    plusPowerByOwner: [0, 0],
+    defendShieldByActiveIdx: [0, 0, 0, 0],
+    plusPowerByActiveIdx: [0, 0, 0, 0],
   };
 
   function flipCoin() { return Math.random() < 0.5; }
@@ -39,13 +39,20 @@
     return s === STATUS.ASLEEP || s === STATUS.PARALYZED;
   }
   function clearStatus(activeIdx) { battleState.statusByActiveIdx[activeIdx] = STATUS.NONE; }
-  function addPlusPowerForOwner(ownerIdx, amount = 1) {
-    if (ownerIdx == null || ownerIdx < 0 || ownerIdx > 1) return;
-    battleState.plusPowerByOwner[ownerIdx] += Math.max(0, amount | 0);
+  function hasStatusCondition(activeIdx) {
+    return battleState.statusByActiveIdx[activeIdx] && battleState.statusByActiveIdx[activeIdx] !== STATUS.NONE;
+  }
+  function addPlusPowerForActive(activeIdx, amount = 1) {
+    if (activeIdx == null || activeIdx < 0 || activeIdx > 3) return;
+    battleState.plusPowerByActiveIdx[activeIdx] += Math.max(0, amount | 0);
+  }
+  function getPlusPowerForActive(activeIdx) {
+    if (activeIdx == null || activeIdx < 0 || activeIdx > 3) return 0;
+    return battleState.plusPowerByActiveIdx[activeIdx] || 0;
   }
   function applyDefenderShield(activeIdx) {
     if (activeIdx == null || activeIdx < 0 || activeIdx > 3) return;
-    battleState.defendShieldByActiveIdx[activeIdx] = true;
+    battleState.defendShieldByActiveIdx[activeIdx] += 1;
   }
   function setStatus(activeIdx, status) {
     if (activeIdx == null || activeIdx < 0) return;
@@ -118,6 +125,14 @@
       title.className = 'attack-pokemon-name';
       title.textContent = card?.name || `Pokémon #${cardId}`;
       row.appendChild(title);
+
+      const plusPowerCount = getPlusPowerForActive(slotIdx);
+      if (plusPowerCount > 0) {
+        const note = document.createElement('div');
+        note.className = 'attack-pokemon-name';
+        note.textContent = `PlusPower attached: +${plusPowerCount * 10} damage this turn`;
+        row.appendChild(note);
+      }
 
       (card.attacks || []).forEach((atk, attackIdx) => {
         const atkObj = U.toAttackObj(card, atk, attackIdx);
@@ -259,7 +274,6 @@
       clearStatus(attackerIdx);
     }
 
-    const attackerOwner = U.ownerOfActiveIdx(attackerIdx);
     let damage = Number(attack.damage) || 0;
     const attackName = attack.name;
     const attackerEnergy = global.attachedEnergy[attackerIdx]?.reduce((a, b) => a + b, 0) || 0;
@@ -284,13 +298,12 @@
       damage = heads * perHit;
     }
 
-    if (battleState.defendShieldByActiveIdx[defenderIdx]) {
-      damage = 0;
-      battleState.defendShieldByActiveIdx[defenderIdx] = false;
+    if (battleState.defendShieldByActiveIdx[defenderIdx] > 0) {
+      damage = Math.max(0, damage - (20 * battleState.defendShieldByActiveIdx[defenderIdx]));
     }
     if (defenderCard.weakness === attackerCard.type) damage *= 2;
     if (defenderCard.resistance === attackerCard.type) damage = Math.max(0, damage - 30);
-    damage += (battleState.plusPowerByOwner[attackerOwner] || 0) * 10;
+    damage += (battleState.plusPowerByActiveIdx[attackerIdx] || 0) * 10;
 
     const hpEl = U.getHpElForActiveIndex(defenderIdx);
     if (!hpEl) return;
@@ -347,7 +360,7 @@
       if (flipCoin()) setStatus(defenderIdx, STATUS.PARALYZED);
     }
     if (attackName === 'Agility' || attackName === 'Barrier' || attackName === 'Scrunch' || attackName === 'Withdraw' || attackName === 'Stiffen') {
-      if (flipCoin() || attackName === 'Barrier') battleState.defendShieldByActiveIdx[attackerIdx] = true;
+      if (flipCoin() || attackName === 'Barrier') battleState.defendShieldByActiveIdx[attackerIdx] += 1;
     }
     if (attackName === 'Leech Seed') healActiveByIdx(attackerIdx, 10);
     if (attackName === 'Recover') {
@@ -393,10 +406,9 @@
   function resetBattleState() {
     for (let i = 0; i < 4; i++) {
       battleState.statusByActiveIdx[i] = STATUS.NONE;
-      battleState.defendShieldByActiveIdx[i] = false;
+      battleState.defendShieldByActiveIdx[i] = 0;
+      battleState.plusPowerByActiveIdx[i] = 0;
     }
-    battleState.plusPowerByOwner[0] = 0;
-    battleState.plusPowerByOwner[1] = 0;
   }
 
   function onTurnStart(activePlayerIdx) {
@@ -410,7 +422,12 @@
     ownerActives(activePlayerIdx).forEach((idx) => {
       if (battleState.statusByActiveIdx[idx] === STATUS.PARALYZED) clearStatus(idx);
     });
-    battleState.plusPowerByOwner[activePlayerIdx] = 0;
+    ownerActives(activePlayerIdx).forEach((idx) => {
+      battleState.plusPowerByActiveIdx[idx] = 0;
+    });
+    ownerActives(1 - activePlayerIdx).forEach((idx) => {
+      battleState.defendShieldByActiveIdx[idx] = 0;
+    });
   }
 
   // Optional hook for your main script; keep idempotent
@@ -422,7 +439,7 @@
     enterTargetSelect, cancelAttackFlow, finalizeAttackFlow,
     checkEnergyForAttack, resolveAttack,
     onTurnStart, onTurnEnd,
-    clearStatus, addPlusPowerForOwner, applyDefenderShield,
+    clearStatus, hasStatusCondition, addPlusPowerForActive, getPlusPowerForActive, applyDefenderShield,
     resetBattleState,
     initUI,
   };

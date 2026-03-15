@@ -696,6 +696,22 @@ function getAvailableActives(pIdx, requireDamaged = false, requireEnergy = false
     return !!hp && hp.cur < hp.max;
   });
 }
+
+function hasAnyDamagedPokemon(pIdx) {
+  const activeDamaged = ownerActives(pIdx).some((aIdx) => {
+    if (UI.activePokemon[aIdx].classList.contains('hidden')) return false;
+    const hp = parseHpText(getHpElForActiveIndex(aIdx)?.textContent || '');
+    return !!hp && hp.cur < hp.max;
+  });
+  if (activeDamaged) return true;
+  return ownerBenchRange(pIdx).some((bIdx) => {
+    if (UI.benchPokemon[bIdx].classList.contains('hidden')) return false;
+    const hpEl = UI.hitpoints[playerKeyOf(pIdx)][(bIdx % 4) + 2];
+    const hp = parseHpText(hpEl?.textContent || '');
+    return !!hp && hp.cur < hp.max;
+  });
+}
+
 function chooseActiveIndex(pIdx, opts = {}) {
   const list = getAvailableActives(pIdx, !!opts.requireDamaged, !!opts.requireEnergy);
   if (!list.length) return null;
@@ -739,6 +755,35 @@ function chooseCardIdFromList(cardIds, promptTitle) {
   return unique.includes(picked) ? picked : null;
 }
 
+function chooseTwoCardIndicesFromHand(pIdx, promptTitle) {
+  const hand = getHandArr(pIdx);
+  if (hand.length < 2) return null;
+  const labels = hand.map((id, idx) => `${idx + 1}. ${formatCardName(id)} (#${id})`).join('\n');
+  const raw = prompt(`${promptTitle}
+${labels}
+
+Enter 2 hand positions separated by comma (example: 1,3):`);
+  if (raw == null || raw.trim() === '') return null;
+  const picks = raw.split(',').map(v => Number.parseInt(v.trim(), 10));
+  const valid = picks.length === 2 &&
+    picks.every(n => Number.isInteger(n) && n >= 1 && n <= hand.length) &&
+    picks[0] !== picks[1];
+  if (!valid) return null;
+  return picks.map(n => n - 1).sort((a, b) => b - a);
+}
+
+function chooseHandCardIndex(pIdx, promptTitle) {
+  const hand = getHandArr(pIdx);
+  if (!hand.length) return null;
+  if (hand.length === 1) return 0;
+  const labels = hand.map((id, idx) => `${idx + 1}. ${formatCardName(id)} (#${id})`).join('\n');
+  const raw = prompt(`${promptTitle}
+${labels}`);
+  const pick = Number.parseInt(raw, 10);
+  if (!Number.isInteger(pick) || pick < 1 || pick > hand.length) return null;
+  return pick - 1;
+}
+
 function chooseDeckOrder(topCards, promptTitle) {
   if (topCards.length <= 1) return topCards;
   const labels = topCards
@@ -764,13 +809,25 @@ function canPlayTrainerCard(cardId, pIdx) {
     case 79:
       return getAvailableActives(pIdx).some(i => attachedEnergy[i].reduce((a, b) => a + b, 0) > 0) &&
         getAvailableActives(opp).some(i => attachedEnergy[i].reduce((a, b) => a + b, 0) > 0);
-    case 80: case 82: return getAvailableActives(pIdx).length > 0;
-    case 84: case 88: case 91: return true;
+    case 80:
+      return getAvailableActives(pIdx).length > 0;
+    case 81:
+      return hasAnyDamagedPokemon(pIdx);
+    case 82:
+      return getAvailableActives(pIdx).some(i => window.Game?.Attack?.hasStatusCondition?.(i));
+    case 83:
+      return getHandArr(pIdx).length >= 3 && (pIdx === 0 ? player1Deck.length : player2Deck.length) > 0;
+    case 84:
+      return getAvailableActives(pIdx).length > 0;
+    case 85:
+      return getHandArr(pIdx).length > 0 && discardPiles[playerKeyOf(pIdx)].some(id => id >= 96 && id <= 101);
     case 86:
       return ownerBenchRange(opp).some(i => UI.benchPokemon[i].classList.contains('hidden')) &&
         discardPiles[playerKeyOf(opp)].some(id => baseBasic.includes(id));
     case 87:
       return (pIdx === 0 ? player1Deck.length : player2Deck.length) > 0;
+    case 88: case 91:
+      return true;
     case 89:
       return ownerBenchRange(pIdx).some(i => UI.benchPokemon[i].classList.contains('hidden')) &&
         discardPiles[playerKeyOf(pIdx)].some(id => baseBasic.includes(id));
@@ -807,15 +864,101 @@ function resolveTrainerCard(cardId, pIdx) {
       window.Game?.Attack?.applyDefenderShield?.(own);
       return true;
     }
+    case 81: {
+      let healedAny = false;
+      ownerActives(pIdx).forEach((aIdx) => {
+        if (UI.activePokemon[aIdx].classList.contains('hidden')) return;
+        const hpEl = getHpElForActiveIndex(aIdx);
+        const hp = parseHpText(hpEl?.textContent || '');
+        if (!hp) return;
+        if (hp.cur < hp.max) {
+          healedAny = true;
+          hpEl.textContent = `${Math.min(hp.max, hp.cur + 20)} / ${hp.max}`;
+        }
+        const total = attachedEnergy[aIdx].reduce((a, b) => a + b, 0);
+        if (total > 0) window.Game?.Energy?.discardEnergyFromActive?.(aIdx, total, { reason: 'Pokémon Center: choose Energy to discard', redraw: true });
+      });
+      ownerBenchRange(pIdx).forEach((bIdx) => {
+        if (UI.benchPokemon[bIdx].classList.contains('hidden')) return;
+        const hpEl = UI.hitpoints[playerKeyOf(pIdx)][(bIdx % 4) + 2];
+        const hp = parseHpText(hpEl?.textContent || '');
+        if (!hp) return;
+        if (hp.cur < hp.max) {
+          healedAny = true;
+          hpEl.textContent = `HP: ${Math.min(hp.max, hp.cur + 20)} / ${hp.max}`;
+        }
+        window.Game?.Energy?.clearEnergyForBenchIndex?.(bIdx);
+      });
+      return healedAny;
+    }
     case 82: {
       const own = chooseActiveIndex(pIdx, { message: 'Choose your Active for Full Heal:' });
-      if (own == null) return false;
+      if (own == null || !window.Game?.Attack?.hasStatusCondition?.(own)) return false;
       window.Game?.Attack?.clearStatus?.(own);
       return true;
     }
-    case 84:
-      window.Game?.Attack?.addPlusPowerForOwner?.(pIdx, 1);
+    case 83: {
+      const handIndexes = chooseTwoCardIndicesFromHand(pIdx, 'Maintenance: Choose 2 cards from your hand to shuffle into your deck');
+      if (!handIndexes) return false;
+      const hand = getHandArr(pIdx);
+      const deck = pIdx === 0 ? player1Deck : player2Deck;
+      const [a, b] = handIndexes;
+      const cardA = hand[a];
+      const cardB = hand[b];
+      if (!cardA || !cardB) return false;
+      hand.splice(a, 1);
+      hand.splice(b, 1);
+      renderHandFor(pIdx);
+      deck.push(cardA, cardB);
+      for (let i = deck.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [deck[i], deck[j]] = [deck[j], deck[i]];
+      }
+      drawCard();
       return true;
+    }
+    case 84: {
+      const own = chooseActiveIndex(pIdx, { message: 'Choose your Active for PlusPower:' });
+      if (own == null) return false;
+      window.Game?.Attack?.addPlusPowerForActive?.(own, 1);
+      return true;
+    }
+    case 85: {
+      const hand = getHandArr(pIdx);
+      const discardFromHand = chooseHandCardIndex(pIdx, 'Energy Retrieval: Choose 1 card from your hand to discard');
+      if (discardFromHand == null) return false;
+      const thrown = hand.splice(discardFromHand, 1)[0];
+      addToDiscard(pIdx, thrown);
+      renderHandFor(pIdx);
+
+      const discard = discardPiles[playerKeyOf(pIdx)];
+      const energyInDiscard = discard.filter(id => id >= 96 && id <= 101);
+      if (!energyInDiscard.length) return true;
+
+      const first = chooseCardIdFromList(energyInDiscard, 'Energy Retrieval: Choose first basic Energy from discard:');
+      if (first == null) return true;
+      const firstPos = discard.indexOf(first);
+      if (firstPos !== -1) {
+        discard.splice(firstPos, 1);
+        hand.push(first);
+      }
+
+      const remaining = discard.filter(id => id >= 96 && id <= 101);
+      if (remaining.length) {
+        const second = chooseCardIdFromList(remaining, 'Energy Retrieval: Choose second basic Energy from discard (optional):');
+        if (second != null) {
+          const secondPos = discard.indexOf(second);
+          if (secondPos !== -1) {
+            discard.splice(secondPos, 1);
+            hand.push(second);
+          }
+        }
+      }
+
+      renderDiscardFor(pIdx);
+      renderHandFor(pIdx);
+      return true;
+    }
     case 86: {
       const oppDiscard = discardPiles[playerKeyOf(opp)];
       const candidates = oppDiscard.filter(id => baseBasic.includes(id));
