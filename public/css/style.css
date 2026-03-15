@@ -767,8 +767,8 @@ main.board-inert .btn--hand2 {
   grid-template-columns: repeat(4, 194.83px);
   grid-auto-rows: 270.83px;
 
-  /* Tighten horizontal gaps */
-  gap: 0.5rem;
+  /* Give selected cards breathing room so the full highlight stays visible */
+  gap: 1.1rem;
 
   /* Do not stretch tracks or spread them out */
   justify-content: start; /* leaves extra space on the right */
@@ -777,17 +777,20 @@ main.board-inert .btn--hand2 {
 
 /* Keep the card thumbs the same size, but don't center them in the cell */
 .hand-card {
+  position: relative;
   width: 194.83px;
   height: 270.83px;
   box-shadow: 0 2rem 5rem rgba(0,0,0,0.2);
-  /* remove: justify-self: center; */
+  border-radius: 8px;
 }
 
 .is-selected-card {
-  outline: 6px solid #f6d743;
-  outline-offset: 3px;
-  box-shadow: 0 0 0 4px rgba(16, 16, 145, 0.55), 0 2rem 5rem rgba(0,0,0,0.25);
-  border-radius: 6px;
+  z-index: 2;
+  border-radius: 8px;
+  box-shadow:
+    inset 0 0 0 6px #18d4ff,
+    0 0 0 2px rgba(10, 35, 120, 0.85),
+    0 2rem 5rem rgba(0,0,0,0.25);
 }
 
 /* Keep Hand buttons above their overlays */
